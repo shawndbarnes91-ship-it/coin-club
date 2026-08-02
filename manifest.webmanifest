@@ -1,0 +1,16 @@
+{
+  "name": "Katia's Coin Club",
+  "short_name": "Coin Club",
+  "description": "Weekly chores, extra jobs, a wallet, streaks and badges.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F3F2FB",
+  "theme_color": "#7C5CFC",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

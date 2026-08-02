@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Katia's Coin Club</title>
+<meta name="description" content="A simple, fun allowance app — weekly chores, an extra-jobs board, a wallet, streaks and badges.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Coin Club">
+<meta name="theme-color" content="#F3F2FB" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#121020" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<style>
+  :root{
+    --grape:#7C5CFC; --grape-ink:#5B3FE0; --grape-soft:#EDE8FF;
+    --gold:#FFB020; --gold-2:#FFC94D; --gold-soft:#FFF0CF;
+    --mint:#22B37D; --mint-soft:#D6F3E7;
+    --coral:#FF6B6B; --coral-soft:#FFE0E0;
+    --bg:#F3F2FB; --card:#FFFFFF; --card-2:#F7F6FD;
+    --ink:#211D33; --ink-soft:#726C8A; --line:#E7E3F3;
+    --shadow:0 8px 24px rgba(45,32,90,.09);
+    --font-round:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+    --font-ui:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --grape:#9B82FF; --grape-ink:#B7A4FF; --grape-soft:#2B2542;
+      --gold:#FFC24D; --gold-2:#FFD780; --gold-soft:#3A311C;
+      --mint:#3ED397; --mint-soft:#183a2e;
+      --coral:#FF8080; --coral-soft:#3d2020;
+      --bg:#121020; --card:#1F1C2E; --card-2:#191627;
+      --ink:#ECEAF7; --ink-soft:#A29CBC; --line:#302B46;
+      --shadow:0 10px 26px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"]{
+    --grape:#7C5CFC; --grape-ink:#5B3FE0; --grape-soft:#EDE8FF;
+    --gold:#FFB020; --gold-2:#FFC94D; --gold-soft:#FFF0CF;
+    --mint:#22B37D; --mint-soft:#D6F3E7; --coral:#FF6B6B; --coral-soft:#FFE0E0;
+    --bg:#F3F2FB; --card:#FFFFFF; --card-2:#F7F6FD;
+    --ink:#211D33; --ink-soft:#726C8A; --line:#E7E3F3; --shadow:0 8px 24px rgba(45,32,90,.09);
+  }
+  :root[data-theme="dark"]{
+    --grape:#9B82FF; --grape-ink:#B7A4FF; --grape-soft:#2B2542;
+    --gold:#FFC24D; --gold-2:#FFD780; --gold-soft:#3A311C;
+    --mint:#3ED397; --mint-soft:#183a2e; --coral:#FF8080; --coral-soft:#3d2020;
+    --bg:#121020; --card:#1F1C2E; --card-2:#191627;
+    --ink:#ECEAF7; --ink-soft:#A29CBC; --line:#302B46; --shadow:0 10px 26px rgba(0,0,0,.45);
+  }
+
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:var(--font-ui);-webkit-font-smoothing:antialiased;overscroll-behavior:none;min-height:100vh}
+  button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit}
+  .num{font-variant-numeric:tabular-nums}
+
+  .app{max-width:480px;margin:0 auto;min-height:100vh;padding:0 16px 108px;position:relative}
+
+  header{position:sticky;top:0;z-index:20;background:var(--bg);padding:calc(14px + env(safe-area-inset-top)) 0 8px;display:flex;align-items:center;justify-content:space-between}
+  .brand{display:flex;align-items:center;gap:10px}
+  .coin{width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 35% 30%,var(--gold-2),var(--gold));display:grid;place-items:center;font-family:var(--font-round);font-weight:800;color:#7a4d00;font-size:18px;box-shadow:inset 0 0 0 3px rgba(255,255,255,.35),0 3px 8px rgba(180,120,0,.35)}
+  .brand h1{font-family:var(--font-round);font-size:18px;margin:0;font-weight:800;letter-spacing:-.2px}
+  .brand small{display:block;color:var(--ink-soft);font-size:11.5px;font-weight:600;margin-top:1px}
+  .rolechip{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);padding:7px 12px;border-radius:100px;font-weight:700;font-size:13px;box-shadow:var(--shadow)}
+  .rolechip .dot{width:8px;height:8px;border-radius:50%;background:var(--grape)}
+  .rolechip.parent .dot{background:var(--mint)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+  .weekpill{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);color:var(--ink-soft);font-weight:700;font-size:12.5px;padding:7px 13px;border-radius:100px;margin:4px 0 14px}
+  .weekpill b{color:var(--ink)}
+  .weekpill .left{color:var(--coral)}
+
+  .jarcard{padding:20px 20px 22px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
+  .jarcard.secured{background:linear-gradient(180deg,var(--mint-soft),var(--card))}
+  .jarwrap{display:flex;align-items:center;justify-content:center;gap:18px}
+  .jar{width:112px;height:132px;flex:none}
+  .jarinfo{text-align:left}
+  .jaramt{font-family:var(--font-round);font-weight:800;font-size:40px;line-height:1;letter-spacing:-1px}
+  .jaramt small{font-size:20px;color:var(--ink-soft);font-weight:700}
+  .jarstatus{margin-top:8px;font-weight:700;font-size:14px;color:var(--ink-soft);max-width:150px}
+  .jarstatus.go{color:var(--mint)}
+  .jarstatus .hi{color:var(--coral)}
+  .secbadge{display:inline-flex;align-items:center;gap:6px;background:var(--mint);color:#fff;font-weight:800;font-size:13px;padding:6px 12px;border-radius:100px;margin-top:10px}
+
+  .sectlabel{font-family:var(--font-round);font-weight:800;font-size:15px;margin:22px 4px 10px;display:flex;align-items:center;justify-content:space-between}
+  .sectlabel .add{color:var(--grape);font-weight:800;font-size:13px;background:var(--grape-soft);padding:6px 12px;border-radius:100px}
+
+  .chore{display:flex;flex-direction:column;gap:12px;padding:15px 16px;margin-bottom:11px}
+  .chore.done{background:linear-gradient(180deg,var(--mint-soft),var(--card))}
+  .chore .top{display:flex;align-items:center;gap:13px}
+  .cico{width:46px;height:46px;flex:none;border-radius:14px;background:var(--card-2);display:grid;place-items:center;font-size:24px;border:1px solid var(--line)}
+  .chore.done .cico{background:var(--mint-soft);border-color:transparent}
+  .cmeta{flex:1;min-width:0}
+  .cmeta .name{font-family:var(--font-round);font-weight:800;font-size:15.5px}
+  .cmeta .sub{color:var(--ink-soft);font-size:12.5px;font-weight:600;margin-top:2px}
+  .cmeta .sub b{color:var(--mint)}
+  .cmeta .sub .pend{color:var(--gold)}
+  .cx{color:var(--ink-soft);font-size:20px;padding:2px 6px;opacity:.5}
+  .checkmini{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;border:2px solid var(--line);color:transparent;font-weight:900;font-size:14px}
+  .chore.done .checkmini{background:var(--mint);border-color:var(--mint);color:#fff}
+
+  .slots{display:flex;gap:7px;flex-wrap:wrap}
+  .slots.stars{gap:9px}
+  .slot{width:37px;height:44px;border-radius:12px;border:2px solid var(--line);background:var(--card-2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-weight:800;font-size:11px;color:var(--ink-soft);position:relative;transition:transform .08s}
+  .slot:active{transform:scale(.9)}
+  .slot .mk{font-size:15px;line-height:1}
+  .slot.pending{border-color:var(--gold);background:var(--gold-soft);color:var(--gold)}
+  .slot.approved{border-color:var(--mint);background:var(--mint);color:#fff}
+  .slot.today{box-shadow:0 0 0 3px var(--grape-soft)}
+  .slot.star{width:44px;height:44px;font-size:20px}
+  .hint{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:2px}
+
+  .job{display:flex;align-items:center;gap:13px;padding:13px 15px;margin-bottom:11px}
+  .jico{width:44px;height:44px;flex:none;border-radius:13px;background:var(--card-2);display:grid;place-items:center;font-size:22px;border:1px solid var(--line)}
+  .jmeta{flex:1;min-width:0}
+  .jmeta .name{font-family:var(--font-round);font-weight:800;font-size:15px}
+  .jmeta .st{font-size:12px;font-weight:700;margin-top:2px;color:var(--ink-soft)}
+  .price{font-family:var(--font-round);font-weight:800;color:var(--gold);font-size:16px}
+  .btn{border-radius:100px;font-weight:800;font-size:13px;padding:9px 15px;background:var(--grape);color:#fff;white-space:nowrap}
+  .btn.ghost{background:var(--grape-soft);color:var(--grape-ink)}
+  .btn.mint{background:var(--mint)}
+  .btn.coral{background:var(--coral-soft);color:var(--coral)}
+  .btn.wide{width:100%;padding:15px;font-size:15px;border-radius:16px}
+  .btn.gold{background:linear-gradient(180deg,var(--gold-2),var(--gold));color:#6b4400}
+  .btn:disabled{opacity:.45}
+  .rowbtns{display:flex;gap:8px}
+
+  .bigtotal{padding:22px;text-align:center;margin-bottom:14px;background:linear-gradient(160deg,var(--grape),var(--grape-ink));color:#fff;border:0}
+  .bigtotal .lab{font-weight:700;opacity:.85;font-size:13px}
+  .bigtotal .amt{font-family:var(--font-round);font-weight:800;font-size:46px;line-height:1.05;margin:4px 0}
+  .bigtotal .brk{display:flex;justify-content:center;gap:18px;margin-top:6px;font-weight:700;font-size:13px;opacity:.95}
+  .brkline{display:flex;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line);font-weight:700}
+  .brkline:last-child{border:0}
+  .brkline .v{font-family:var(--font-round);font-weight:800}
+  .stat2{display:flex;gap:12px;margin:14px 0}
+  .stat2 .card{flex:1;padding:16px;text-align:center}
+  .stat2 .k{font-family:var(--font-round);font-weight:800;font-size:26px}
+  .stat2 .l{color:var(--ink-soft);font-size:12px;font-weight:700;margin-top:2px}
+  .hist{padding:4px 15px}
+  .histrow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-weight:700;font-size:13.5px}
+  .histrow:last-child{border:0}
+  .histrow .d{color:var(--ink-soft);font-weight:600;font-size:12px}
+  .tag{font-size:11px;font-weight:800;padding:3px 9px;border-radius:100px}
+  .tag.perfect{background:var(--mint-soft);color:var(--mint)}
+  .tag.part{background:var(--gold-soft);color:var(--gold)}
+
+  .streakcard{padding:20px;text-align:center;margin-bottom:16px;background:linear-gradient(160deg,#FF9A3D,var(--coral));color:#fff;border:0}
+  .streakcard .big{font-family:var(--font-round);font-weight:800;font-size:52px;line-height:1}
+  .streakcard .l{font-weight:700;opacity:.95}
+  .badges{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+  .badge{padding:16px;text-align:center}
+  .badge .em{font-size:34px;filter:grayscale(1);opacity:.35}
+  .badge.on .em{filter:none;opacity:1}
+  .badge .bn{font-family:var(--font-round);font-weight:800;font-size:13.5px;margin-top:6px}
+  .badge .bd{color:var(--ink-soft);font-size:11.5px;font-weight:600;margin-top:2px}
+  .badge.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft),var(--shadow)}
+
+  .empty{text-align:center;color:var(--ink-soft);font-weight:600;font-size:13.5px;padding:26px 10px}
+
+  nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;max-width:480px;margin:0 auto}
+  nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--ink-soft);font-weight:700;font-size:11px;border-radius:14px}
+  nav button .ni{font-size:21px;line-height:1}
+  nav button.active{color:var(--grape)}
+  nav button.active .ni{transform:translateY(-1px)}
+
+  .scrim{position:fixed;inset:0;background:rgba(20,14,40,.5);z-index:40;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
+  .scrim.on{display:flex}
+  .sheet{background:var(--card);width:100%;max-width:480px;border-radius:26px 26px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+  .sheet h3{font-family:var(--font-round);font-weight:800;margin:2px 0 14px;font-size:19px}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-weight:700;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px}
+  .field input,.field select{width:100%;padding:13px 14px;border-radius:13px;border:1.5px solid var(--line);background:var(--card-2);color:var(--ink);font-size:16px;font-family:inherit;font-weight:600}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--grape)}
+  .emojirow{display:flex;gap:8px;flex-wrap:wrap}
+  .emojirow button{width:44px;height:44px;border-radius:12px;border:2px solid var(--line);background:var(--card-2);font-size:22px}
+  .emojirow button.sel{border-color:var(--grape);background:var(--grape-soft)}
+  .sheetbtns{display:flex;gap:10px;margin-top:8px}
+
+  #cfx{position:fixed;inset:0;pointer-events:none;z-index:50}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="app" id="app"></div>
+<nav id="nav"></nav>
+<div class="scrim" id="scrim"><div class="sheet" id="sheet"></div></div>
+<canvas id="cfx"></canvas>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ---------- storage (swap this block for cloud sync later) ---------- */
+  var KEY = "katia-coin-club-v2";
+  var Store = {
+    load:function(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } },
+    save:function(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+  };
+
+  var DAYS = ["Sa","Su","Mo","Tu","We","Th","Fr"];
+  function startOfWeek(d){ var x=new Date(d); x.setHours(0,0,0,0); var diff=(x.getDay()-6+7)%7; x.setDate(x.getDate()-diff); return x; }
+  function fmtWeek(iso){ var s=new Date(iso); var e=new Date(s); e.setDate(e.getDate()+6);
+    var o={month:"short",day:"numeric"}; return s.toLocaleDateString(undefined,o)+" – "+e.toLocaleDateString(undefined,o); }
+  function daysLeft(iso){ var e=new Date(iso); e.setDate(e.getDate()+6); e.setHours(23,59,59,0);
+    return Math.max(0, Math.ceil((e-new Date())/86400000)); }
+  function todayIdx(iso){ var i=Math.floor((new Date()-new Date(iso))/86400000); return i<0?-1:(i>6?-1:i); }
+  function uid(){ return "id"+Math.random().toString(36).slice(2,9); }
+
+  function defaultState(){
+    return {
+      v:2, child:"Katia", base:20, pin:"2468",
+      weekStart:startOfWeek(new Date()).toISOString(),
+      required:[
+        {id:"bed",     name:"Make your bed",          icon:"🛏️", layout:"week",  slots:7, need:6},
+        {id:"dogs",    name:"Dog duty · feed + water", icon:"🐶", layout:"week",  slots:7, need:6},
+        {id:"dishes",  name:"Dinner cleanup",          icon:"🍽️", layout:"week",  slots:7, need:6},
+        {id:"room",    name:"Room reset",              icon:"🧹", layout:"stars", slots:2, need:2},
+        {id:"laundry", name:"Put away laundry",        icon:"🧺", layout:"stars", slots:1, need:1}
+      ],
+      marks:{},
+      jobs:[
+        {id:uid(), name:"Wash a car",            icon:"🚗", price:5, status:"open"},
+        {id:uid(), name:"Bathe the dogs",        icon:"🛁", price:6, status:"open"},
+        {id:uid(), name:"Deep-clean a bathroom", icon:"🧽", price:5, status:"open"},
+        {id:uid(), name:"Vacuum whole house",    icon:"🧹", price:4, status:"open"},
+        {id:uid(), name:"Yard work help",        icon:"🌿", price:5, status:"open"},
+        {id:uid(), name:"Take out all trash",    icon:"🚮", price:2, status:"open"}
+      ],
+      earnings:[], history:[],
+      lifetime:0, lifetimeExtras:0, perfectWeeks:0, streak:0
+    };
+  }
+
+  var state = Store.load() || defaultState();
+  var role = "katia";
+  var tab  = "week";
+
+  (function rollover(){
+    var cur = startOfWeek(new Date()).toISOString();
+    if(state.weekStart !== cur){ state.weekStart = cur; state.marks = {}; save(); }
+  })();
+
+  function save(){ Store.save(state); }
+  function marksFor(c){ var m=state.marks[c.id]; if(!m||m.length!==c.slots){ m=new Array(c.slots).fill(0); state.marks[c.id]=m; } return m; }
+  function approvedCount(c){ return marksFor(c).filter(function(x){return x===2;}).length; }
+  function secured(c){ return approvedCount(c) >= c.need; }
+  function allSecured(){ return state.required.length>0 && state.required.every(secured); }
+  function weekExtras(){ return state.earnings.filter(function(e){return e.week===state.weekStart;})
+      .reduce(function(a,e){return a+e.amount;},0); }
+  function projected(){ return (allSecured()?state.base:0) + weekExtras(); }
+
+  var app = document.getElementById("app");
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}); }
+
+  function render(){
+    var head =
+      '<header><div class="brand"><div class="coin">$</div>'+
+      '<div><h1>'+esc(state.child)+"'s Coin Club</h1><small>$"+state.base+' a week + extra jobs</small></div></div>'+
+      '<button class="rolechip '+(role==="parent"?"parent":"")+'" data-act="role"><span class="dot"></span>'+
+      (role==="parent"?"Parent":esc(state.child))+'</button></header>';
+
+    var body = tab==="week" ? viewWeek()
+             : tab==="jobs" ? viewJobs()
+             : tab==="wallet" ? viewWallet()
+             : viewWins();
+
+    app.innerHTML = head + body;
+    renderNav();
+  }
+
+  function viewWeek(){
+    var sec = state.required.filter(secured).length, tot = state.required.length;
+    var pct = tot? sec/tot : 0;
+    var left = daysLeft(state.weekStart);
+    var done = allSecured();
+    var toGo = tot - sec;
+
+    var status = done
+      ? '<div class="jarstatus go">$'+state.base+' is locked in for this week! 🎉</div>'
+      : '<div class="jarstatus"><span class="hi">'+toGo+'</span> more to lock your $'+state.base+'</div>';
+
+    var jar =
+      '<section class="card jarcard '+(done?"secured":"")+'">'+
+        '<div class="jarwrap">'+jarSVG(pct)+
+          '<div class="jarinfo"><div class="jaramt">$'+(done?state.base:0)+'<small>/'+state.base+'</small></div>'+
+          status+ (done?'<div class="secbadge">✓ Week secured</div>':"")+'</div>'+
+        '</div></section>';
+
+    var pill = '<div class="weekpill">📅 <b>This week</b> · '+fmtWeek(state.weekStart)+
+      ' · <span class="left">'+(left===0?"last day!":left+" days left")+'</span></div>';
+
+    var list = state.required.map(choreCard).join("") ||
+      '<div class="card empty">No required chores yet. Switch to Parent to add some.</div>';
+
+    var addBtn = role==="parent" ? '<button class="add" data-act="addchore">+ Add</button>' : "";
+
+    return pill + jar +
+      '<div class="sectlabel">Required chores'+addBtn+'</div>' + list +
+      (role!=="parent" ? '<div class="hint" style="text-align:center;margin-top:6px">Tap a day to mark it done — a parent approves it ✓</div>' : "");
+  }
+
+  function choreCard(c){
+    var ap=approvedCount(c), pend=marksFor(c).filter(function(x){return x===1;}).length, ok=secured(c);
+    var ti = c.layout==="week" ? todayIdx(state.weekStart) : -1;
+    var slots = marksFor(c).map(function(v,i){
+      var cls = v===2?"approved":v===1?"pending":"";
+      var mark = v===2?"✓":v===1?"•":"";
+      if(c.layout==="week"){
+        return '<button class="slot '+cls+(i===ti?" today":"")+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+
+          '<span class="mk">'+mark+'</span>'+DAYS[i]+'</button>';
+      }
+      return '<button class="slot star '+cls+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+(v===2?"★":"☆")+'</button>';
+    }).join("");
+
+    var goal = c.layout==="week" ? ("Any "+c.need+" of 7 days") : (c.need+"× this week");
+    var sub = ok
+      ? '<b>✓ Secured — nice!</b>'
+      : goal + ' · '+ap+'/'+c.need+' done'+(pend?' <span class="pend">· '+pend+" waiting</span>":"");
+
+    var x = role==="parent" ? '<button class="cx" data-act="delchore" data-c="'+c.id+'">✕</button>' : "";
+
+    return '<section class="card chore '+(ok?"done":"")+'"><div class="top">'+
+      '<div class="cico">'+c.icon+'</div>'+
+      '<div class="cmeta"><div class="name">'+esc(c.name)+'</div><div class="sub">'+sub+'</div></div>'+
+      (ok?'<div class="checkmini">✓</div>':x)+
+      '</div><div class="slots '+(c.layout==="stars"?"stars":"")+'">'+slots+'</div></section>';
+  }
+
+  function jarSVG(pct){
+    pct=Math.max(0,Math.min(1,pct));
+    var top=118 - 96*pct;
+    var coins="";
+    if(pct>0){
+      coins='<ellipse cx="45" cy="'+(top+9)+'" rx="12" ry="5" fill="#fff" opacity=".25"/>'+
+            '<ellipse cx="72" cy="'+(top+16)+'" rx="10" ry="4.5" fill="#fff" opacity=".18"/>';
+    }
+    return '<svg class="jar" viewBox="0 0 120 140" aria-hidden="true">'+
+      '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0" stop-color="var(--gold-2)"/><stop offset="1" stop-color="var(--gold)"/></linearGradient>'+
+      '<clipPath id="jc"><rect x="20" y="22" width="80" height="100" rx="18"/></clipPath></defs>'+
+      '<rect x="34" y="6" width="52" height="14" rx="7" fill="var(--line)"/>'+
+      '<rect x="20" y="22" width="80" height="100" rx="18" fill="var(--card-2)" stroke="var(--line)" stroke-width="2"/>'+
+      '<g clip-path="url(#jc)"><rect x="20" y="'+top+'" width="80" height="140" fill="url(#g)"/>'+coins+'</g>'+
+      '<rect x="20" y="22" width="80" height="100" rx="18" fill="none" stroke="var(--line)" stroke-width="2"/>'+
+      '<text x="60" y="'+(pct>.18?(118-96*pct):114)+'" text-anchor="middle" font-family="var(--font-round)" font-weight="800" font-size="20" fill="#6b4400" opacity="'+(pct>.12?.9:0)+'">$</text>'+
+      '</svg>';
+  }
+
+  function viewJobs(){
+    var open=[], mine=[], proposed=[];
+    state.jobs.forEach(function(j){
+      if(j.status==="proposed") proposed.push(j);
+      else if(j.status==="open") open.push(j);
+      else mine.push(j);
+    });
+
+    var out="";
+    if(mine.length){ out += '<div class="sectlabel">In progress</div>' + mine.map(jobCard).join(""); }
+    if(proposed.length){ out += '<div class="sectlabel">'+(role==="parent"?"Katia proposed":"Waiting for a parent")+'</div>' + proposed.map(jobCard).join(""); }
+    var addBtn = role==="parent" ? '<button class="add" data-act="addjob">+ Add job</button>'
+                                 : '<button class="add" data-act="propose">+ Suggest one</button>';
+    out += '<div class="sectlabel">Job board'+addBtn+'</div>';
+    out += open.length ? open.map(jobCard).join("") : '<div class="card empty">No open jobs right now.</div>';
+    return out;
+  }
+
+  function jobCard(j){
+    var st="", act="", del = role==="parent" && j.status==="open" ? '<button class="cx" data-act="deljob" data-j="'+j.id+'">✕</button>' : "";
+    if(j.status==="open"){
+      st = "Available";
+      act = role==="parent" ? "" : '<button class="btn ghost" data-act="claim" data-j="'+j.id+'">Claim</button>';
+    } else if(j.status==="claimed"){
+      st = "Claimed by "+esc(state.child);
+      act = role==="parent" ? '<button class="btn coral" data-act="unclaim" data-j="'+j.id+'">Return</button>'
+                            : '<button class="btn" data-act="markjob" data-j="'+j.id+'">Mark done</button>';
+    } else if(j.status==="pending"){
+      st = '<span style="color:var(--gold)">Done — waiting for approval</span>';
+      act = role==="parent" ? '<div class="rowbtns"><button class="btn coral" data-act="rejectjob" data-j="'+j.id+'">✕</button>'+
+             '<button class="btn mint" data-act="payjob" data-j="'+j.id+'">Approve $'+j.price+'</button></div>' : "Nice work! 🙌";
+    } else if(j.status==="proposed"){
+      st = "Suggested"+(j.price?" · $"+j.price:"");
+      act = role==="parent" ? '<div class="rowbtns"><button class="btn coral" data-act="deljob" data-j="'+j.id+'">✕</button>'+
+             '<button class="btn mint" data-act="postjob" data-j="'+j.id+'">Post it</button></div>' : "Waiting…";
+    }
+    var actHtml = typeof act==="string" && act.indexOf("<")===-1 ? '<span class="jmeta" style="flex:0;color:var(--ink-soft);font-size:12px;font-weight:700">'+act+'</span>' : act;
+    return '<section class="card job"><div class="jico">'+j.icon+'</div>'+
+      '<div class="jmeta"><div class="name">'+esc(j.name)+'</div><div class="st">'+st+'</div></div>'+
+      '<div style="display:flex;align-items:center;gap:10px"><span class="price">$'+j.price+'</span>'+actHtml+del+'</div></section>';
+  }
+
+  function viewWallet(){
+    var ex=weekExtras(), base=allSecured()?state.base:0, tot=base+ex;
+    var big =
+      '<section class="card bigtotal"><div class="lab">This Friday, '+esc(state.child)+' gets</div>'+
+      '<div class="amt num">$'+tot+'</div>'+
+      '<div class="brk"><span>Base $'+base+'</span><span>+ Extras $'+ex+'</span></div></section>';
+
+    var brk = '<section class="card" style="padding:6px 16px"><div class="brkline"><span>Weekly chores '+
+      (allSecured()?'<span class="tag perfect">secured</span>':'<span class="tag part">not yet</span>')+'</span><span class="v num">$'+base+'</span></div>'+
+      '<div class="brkline"><span>Extra jobs done</span><span class="v num">$'+ex+'</span></div>'+
+      '<div class="brkline"><span><b>Payday total</b></span><span class="v num">$'+tot+'</span></div></section>';
+
+    var payBtn = role==="parent"
+      ? '<button class="btn wide gold" data-act="pay" style="margin:14px 0" '+(tot<=0?"disabled":"")+'>💸 Pay $'+tot+' & start next week</button>'
+      : '<div class="hint" style="text-align:center;margin:14px 0">A parent taps “Pay” on Friday to send it and start a fresh week.</div>';
+
+    var stats = '<div class="stat2"><div class="card"><div class="k num">$'+state.lifetime+'</div><div class="l">Earned all-time</div></div>'+
+      '<div class="card"><div class="k num">'+state.history.length+'</div><div class="l">Weeks paid</div></div></div>';
+
+    var hist = state.history.length
+      ? '<div class="sectlabel">Payday history</div><section class="card hist">'+
+        state.history.slice(0,12).map(function(h){
+          return '<div class="histrow"><div><div>'+fmtWeek(h.week)+'</div><div class="d">'+
+            (h.perfect?'<span class="tag perfect">perfect week</span>':'<span class="tag part">partial</span>')+'</div></div>'+
+            '<span class="num">$'+h.total+'</span></div>';
+        }).join("")+'</section>'
+      : "";
+
+    return big + brk + payBtn + stats + hist;
+  }
+
+  function viewWins(){
+    var b = [
+      {em:"🌟", n:"First Payday",  d:"Get paid once",   on:state.history.length>=1},
+      {em:"🔥", n:"On Fire",       d:"3-week streak",   on:state.streak>=3},
+      {em:"💎", n:"Flawless Four", d:"4 perfect weeks", on:state.perfectWeeks>=4},
+      {em:"💼", n:"Side Hustler",  d:"$25 from jobs",   on:state.lifetimeExtras>=25},
+      {em:"🏦", n:"Big Saver",     d:"$100 all-time",   on:state.lifetime>=100},
+      {em:"👑", n:"Coin Royalty",  d:"$250 all-time",   on:state.lifetime>=250}
+    ];
+    var streak = '<section class="card streakcard"><div class="big num">🔥 '+state.streak+'</div>'+
+      '<div class="l">week streak — keep it going!</div></section>';
+    var grid = '<div class="badges">'+b.map(function(x){
+      return '<section class="card badge '+(x.on?"on":"")+'"><div class="em">'+x.em+'</div>'+
+        '<div class="bn">'+x.n+'</div><div class="bd">'+x.d+'</div></section>';
+    }).join("")+'</div>';
+    var settings = role==="parent"
+      ? '<div class="sectlabel">Parent settings</div><section class="card" style="padding:8px 6px">'+
+        '<button class="btn wide ghost" data-act="settings" style="margin:6px 0">⚙️ Edit name, amount & PIN</button>'+
+        '<button class="btn wide coral" data-act="resetall" style="margin:6px 0">↺ Reset everything</button></section>'
+      : "";
+    return streak + '<div class="sectlabel">Badges</div>' + grid + settings;
+  }
+
+  function renderNav(){
+    var items=[["week","🏠","Week"],["jobs","💼","Jobs"],["wallet","👛","Wallet"],["wins","🏅","Wins"]];
+    document.getElementById("nav").innerHTML = items.map(function(it){
+      return '<button data-act="tab" data-t="'+it[0]+'" class="'+(tab===it[0]?"active":"")+'">'+
+        '<span class="ni">'+it[1]+'</span>'+it[2]+'</button>';
+    }).join("");
+  }
+
+  document.addEventListener("click", function(ev){
+    var t = ev.target.closest("[data-act]"); if(!t) return;
+    var a = t.getAttribute("data-act");
+
+    if(a==="tab"){ tab=t.getAttribute("data-t"); render(); return; }
+    if(a==="role"){ role==="parent" ? setRole("katia") : askPin(); return; }
+    if(a==="slot"){ onSlot(t.getAttribute("data-c"), +t.getAttribute("data-i")); return; }
+
+    var jid=t.getAttribute("data-j");
+    if(a==="claim"){ setJob(jid,"claimed"); return; }
+    if(a==="unclaim"){ setJob(jid,"open"); return; }
+    if(a==="markjob"){ setJob(jid,"pending"); return; }
+    if(a==="rejectjob"){ setJob(jid,"claimed"); return; }
+    if(a==="payjob"){ payJob(jid); return; }
+    if(a==="postjob"){ setJob(jid,"open"); return; }
+    if(a==="deljob"){ state.jobs=state.jobs.filter(function(j){return j.id!==jid;}); save(); render(); return; }
+    if(a==="addjob"){ jobSheet(); return; }
+    if(a==="propose"){ proposeSheet(); return; }
+
+    if(a==="addchore"){ choreSheet(); return; }
+    if(a==="delchore"){ var cid=t.getAttribute("data-c"); state.required=state.required.filter(function(c){return c.id!==cid;}); delete state.marks[cid]; save(); render(); return; }
+
+    if(a==="pay"){ confirmPay(); return; }
+    if(a==="settings"){ settingsSheet(); return; }
+    if(a==="resetall"){ confirmReset(); return; }
+
+    if(a==="closesheet"){ closeSheet(); return; }
+  });
+
+  function onSlot(cid,i){
+    var c=state.required.find(function(x){return x.id===cid;}); if(!c) return;
+    var m=marksFor(c), was=allSecured();
+    if(role==="parent"){ m[i] = m[i]===2 ? 0 : 2; }
+    else { if(m[i]===2) return; m[i] = m[i]===1 ? 0 : 1; }
+    save();
+    if(!was && allSecured()) burst();
+    render();
+  }
+
+  function setRole(r){ role=r; render(); }
+  function setJob(id,status){ var j=state.jobs.find(function(x){return x.id===id;}); if(j){ j.status=status; save(); render(); } }
+  function payJob(id){
+    var j=state.jobs.find(function(x){return x.id===id;}); if(!j) return;
+    state.earnings.push({id:uid(),label:j.name,amount:j.price,week:state.weekStart,ts:Date.now()});
+    if(j.proposed){ state.jobs=state.jobs.filter(function(x){return x.id!==id;}); }
+    else j.status="open";
+    save(); burst(); render();
+  }
+
+  function confirmPay(){
+    var tot=projected();
+    openSheet('<h3>Send $'+tot+' to '+esc(state.child)+'?</h3>'+
+      '<p style="color:var(--ink-soft);font-weight:600;font-size:13.5px;margin-top:-6px">This logs the payday and starts a fresh Saturday–Friday week. Do your bank transfer for <b>$'+tot+'</b>, then confirm.</p>'+
+      sheetButtons("Confirm payday"));
+    document.getElementById("__ok").onclick=function(){
+      var perfect=allSecured(), ex=weekExtras(), base=perfect?state.base:0, tot=base+ex;
+      state.lifetime+=tot; state.lifetimeExtras+=ex;
+      if(perfect){ state.perfectWeeks++; state.streak++; } else state.streak=0;
+      state.history.unshift({week:state.weekStart,base:base,extras:ex,total:tot,perfect:perfect,ts:Date.now()});
+      state.weekStart=startOfWeek(new Date()).toISOString(); state.marks={};
+      save(); closeSheet(); tab="wallet"; burst(); render();
+    };
+  }
+
+  var scrim=document.getElementById("scrim"), sheet=document.getElementById("sheet");
+  function openSheet(html){ sheet.innerHTML=html; scrim.classList.add("on"); }
+  function closeSheet(){ scrim.classList.remove("on"); }
+  scrim.addEventListener("click",function(e){ if(e.target===scrim) closeSheet(); });
+  function sheetButtons(okLabel){ return '<div class="sheetbtns"><button class="btn wide ghost" data-act="closesheet">Cancel</button>'+
+    '<button class="btn wide" id="__ok">'+okLabel+'</button></div>'; }
+
+  function askPin(){
+    openSheet('<h3>Parent mode 🔒</h3>'+
+      '<p style="color:var(--ink-soft);font-weight:600;font-size:13px;margin-top:-6px">Enter the parent PIN so approvals stay with mom &amp; dad.</p>'+
+      '<div class="field"><input id="pin" type="tel" inputmode="numeric" maxlength="8" placeholder="••••" style="text-align:center;letter-spacing:8px;font-size:22px"></div>'+
+      sheetButtons("Unlock"));
+    var inp=document.getElementById("pin"); inp.focus();
+    document.getElementById("__ok").onclick=function(){
+      if(inp.value===String(state.pin)){ closeSheet(); setRole("parent"); }
+      else { inp.value=""; inp.placeholder="wrong PIN"; inp.style.borderColor="var(--coral)"; }
+    };
+  }
+
+  var EMO_CHORE=["🛏️","🐶","🍽️","🧹","🧺","🚮","🪥","📚","🌱","🐟","🧦","🧴"];
+  var EMO_JOB=["🚗","🛁","🧽","🧹","🌿","🚮","🪟","🧊","📦","🍳","🐕","🧼"];
+
+  function pickerHTML(list,sel){ return '<div class="emojirow" id="emo">'+list.map(function(e){
+    return '<button type="button" data-e="'+e+'" class="'+(e===sel?"sel":"")+'">'+e+'</button>';}).join("")+'</div>'; }
+  function wirePicker(){ var box=document.getElementById("emo"); if(!box)return;
+    box.addEventListener("click",function(e){ var b=e.target.closest("[data-e]"); if(!b)return;
+      [].forEach.call(box.children,function(c){c.classList.remove("sel");}); b.classList.add("sel"); box.dataset.sel=b.getAttribute("data-e"); }); }
+  function pickedEmo(fallback){ var box=document.getElementById("emo"); return (box&&box.dataset.sel)||fallback; }
+
+  function choreSheet(){
+    openSheet('<h3>New required chore</h3>'+
+      '<div class="field"><label>What is it?</label><input id="cn" placeholder="e.g. Feed the fish"></div>'+
+      '<div class="field"><label>Pick an icon</label>'+pickerHTML(EMO_CHORE,"🧹")+'</div>'+
+      '<div class="field"><label>How often?</label><select id="cl">'+
+        '<option value="daily">Every day (needs 6 of 7)</option>'+
+        '<option value="2">Twice a week</option>'+
+        '<option value="1">Once a week</option>'+
+        '<option value="3">3× a week</option></select></div>'+
+      sheetButtons("Add chore"));
+    wirePicker();
+    document.getElementById("__ok").onclick=function(){
+      var name=document.getElementById("cn").value.trim(); if(!name) return;
+      var v=document.getElementById("cl").value, chore;
+      if(v==="daily") chore={id:uid(),name:name,icon:pickedEmo("🧹"),layout:"week",slots:7,need:6};
+      else { var n=+v; chore={id:uid(),name:name,icon:pickedEmo("🧹"),layout:"stars",slots:n,need:n}; }
+      state.required.push(chore); save(); closeSheet(); render();
+    };
+  }
+
+  function jobSheet(){
+    openSheet('<h3>New extra job</h3>'+
+      '<div class="field"><label>Job</label><input id="jn" placeholder="e.g. Sweep the garage"></div>'+
+      '<div class="field"><label>Icon</label>'+pickerHTML(EMO_JOB,"🧹")+'</div>'+
+      '<div class="field"><label>Pays ($)</label><input id="jp" type="tel" inputmode="numeric" placeholder="5"></div>'+
+      sheetButtons("Post job"));
+    wirePicker();
+    document.getElementById("__ok").onclick=function(){
+      var name=document.getElementById("jn").value.trim(), price=parseInt(document.getElementById("jp").value,10);
+      if(!name||!(price>=0)) return;
+      state.jobs.push({id:uid(),name:name,icon:pickedEmo("🧹"),price:price,status:"open"}); save(); closeSheet(); render();
+    };
+  }
+
+  function proposeSheet(){
+    openSheet('<h3>Suggest a job 💡</h3>'+
+      '<p style="color:var(--ink-soft);font-weight:600;font-size:13px;margin-top:-6px">Tell mom or dad what you\'d like to do. They\'ll set the price and post it.</p>'+
+      '<div class="field"><label>What would you do?</label><input id="jn" placeholder="e.g. Organize the pantry"></div>'+
+      '<div class="field"><label>Icon</label>'+pickerHTML(EMO_JOB,"💡")+'</div>'+
+      '<div class="field"><label>How much is it worth? (optional)</label><input id="jp" type="tel" inputmode="numeric" placeholder="$"></div>'+
+      sheetButtons("Send it"));
+    wirePicker();
+    document.getElementById("__ok").onclick=function(){
+      var name=document.getElementById("jn").value.trim(); if(!name) return;
+      var price=parseInt(document.getElementById("jp").value,10); if(!(price>=0)) price=0;
+      state.jobs.push({id:uid(),name:name,icon:pickedEmo("💡"),price:price,status:"proposed",proposed:true}); save(); closeSheet(); render();
+    };
+  }
+
+  function settingsSheet(){
+    openSheet('<h3>Settings</h3>'+
+      '<div class="field"><label>Child\'s name</label><input id="sn" value="'+esc(state.child)+'"></div>'+
+      '<div class="field"><label>Weekly base ($)</label><input id="sb" type="tel" inputmode="numeric" value="'+state.base+'"></div>'+
+      '<div class="field"><label>Parent PIN</label><input id="sp" type="tel" inputmode="numeric" value="'+esc(state.pin)+'"></div>'+
+      sheetButtons("Save"));
+    document.getElementById("__ok").onclick=function(){
+      state.child=document.getElementById("sn").value.trim()||state.child;
+      var b=parseInt(document.getElementById("sb").value,10); if(b>=0) state.base=b;
+      var p=document.getElementById("sp").value.trim(); if(p) state.pin=p;
+      save(); closeSheet(); render();
+    };
+  }
+
+  function confirmReset(){
+    openSheet('<h3>Reset everything?</h3><p style="color:var(--ink-soft);font-weight:600;font-size:13.5px;margin-top:-6px">This wipes all progress, earnings and history back to the starting setup. Can’t be undone.</p>'+
+      sheetButtons("Yes, reset"));
+    document.getElementById("__ok").onclick=function(){ state=defaultState(); role="katia"; tab="week"; save(); closeSheet(); render(); };
+  }
+
+  var cv=document.getElementById("cfx"), ctx=cv.getContext("2d"), parts=[], raf=null;
+  function size(){ cv.width=innerWidth; cv.height=innerHeight; } size(); addEventListener("resize",size);
+  function burst(){
+    if(matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+    var cols=["#7C5CFC","#FFB020","#22B37D","#FF6B6B","#FFC94D"];
+    for(var i=0;i<90;i++) parts.push({x:innerWidth/2,y:innerHeight*0.35,
+      vx:(Math.random()-.5)*11,vy:Math.random()*-12-3,g:.45,
+      s:5+Math.random()*6,c:cols[i%cols.length],r:Math.random()*6,vr:(Math.random()-.5)*.4,life:0});
+    if(!raf) raf=requestAnimationFrame(tick);
+  }
+  function tick(){
+    ctx.clearRect(0,0,cv.width,cv.height); var alive=false;
+    for(var i=0;i<parts.length;i++){ var p=parts[i]; if(p.life>140) continue; alive=true;
+      p.life++; p.vy+=p.g; p.x+=p.vx; p.y+=p.vy; p.r+=p.vr;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r); ctx.globalAlpha=Math.max(0,1-p.life/140);
+      ctx.fillStyle=p.c; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6); ctx.restore(); }
+    if(alive) raf=requestAnimationFrame(tick); else { raf=null; parts=[]; ctx.clearRect(0,0,cv.width,cv.height); }
+  }
+
+  render();
+})();
+</script>
+<script>
+if('serviceWorker' in navigator){ addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+</script>
+</body>
+</html>
