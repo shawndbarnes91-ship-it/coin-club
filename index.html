@@ -117,7 +117,14 @@
   .slot.approved{border-color:var(--mint);background:var(--mint);color:#fff}
   .slot.today{box-shadow:0 0 0 3px var(--grape-soft)}
   .slot.star{width:44px;height:44px;font-size:20px}
+  .slot.pop{animation:slotpop .32s ease}
+  @keyframes slotpop{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
   .hint{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:2px}
+
+  .cright{display:flex;align-items:center;gap:2px}
+  .grip{color:var(--ink-soft);font-size:20px;padding:4px 8px;cursor:grab;opacity:.55;line-height:1;touch-action:none}
+  body.dragging{user-select:none;-webkit-user-select:none;overflow:hidden}
+  .chore.draghot{box-shadow:0 0 0 2px var(--grape),var(--shadow);opacity:.97}
 
   .job{display:flex;align-items:center;gap:13px;padding:13px 15px;margin-bottom:11px}
   .jico{width:44px;height:44px;flex:none;border-radius:13px;background:var(--card-2);display:grid;place-items:center;font-size:22px;border:1px solid var(--line)}
@@ -174,20 +181,35 @@
 
   .scrim{position:fixed;inset:0;background:rgba(20,14,40,.5);z-index:40;display:none;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
   .scrim.on{display:flex}
-  .sheet{background:var(--card);width:100%;max-width:480px;border-radius:26px 26px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.25)}
+  .sheet{background:var(--card);width:100%;max-width:480px;border-radius:26px 26px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.25);max-height:88vh;overflow-y:auto}
   .sheet h3{font-family:var(--font-round);font-weight:800;margin:2px 0 14px;font-size:19px}
   .field{margin-bottom:12px}
   .field label{display:block;font-weight:700;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px}
   .field input,.field select{width:100%;padding:13px 14px;border-radius:13px;border:1.5px solid var(--line);background:var(--card-2);color:var(--ink);font-size:16px;font-family:inherit;font-weight:600}
   .field input:focus,.field select:focus{outline:none;border-color:var(--grape)}
-  .emojirow{display:flex;gap:8px;flex-wrap:wrap}
-  .emojirow button{width:44px;height:44px;border-radius:12px;border:2px solid var(--line);background:var(--card-2);font-size:22px}
-  .emojirow button.sel{border-color:var(--grape);background:var(--grape-soft)}
   .sheetbtns{display:flex;gap:10px;margin-top:8px}
+
+  /* icon picker */
+  .iconhead{display:flex;gap:10px;align-items:center;margin-bottom:8px}
+  .iconcur{width:48px;height:48px;flex:none;border-radius:12px;background:var(--card-2);border:1px solid var(--line);display:grid;place-items:center;font-size:26px}
+  .iconsearch{flex:1;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--card-2);color:var(--ink);font-size:16px;font-weight:600;font-family:inherit}
+  .iconsearch:focus{outline:none;border-color:var(--grape)}
+  .icongrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));gap:6px;max-height:184px;overflow-y:auto;padding:6px;background:var(--card-2);border-radius:12px}
+  .iconopt{height:40px;border-radius:10px;font-size:22px;background:transparent;border:1.5px solid transparent}
+  .iconopt.sel{background:var(--grape-soft);border-color:var(--grape)}
+  .iconnone{grid-column:1/-1;text-align:center;color:var(--ink-soft);font-weight:600;font-size:13px;padding:16px}
+
+  /* approvals */
+  .aprow{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}
+  .aprow:last-child{border:0}
+  .apico{width:38px;height:38px;flex:none;border-radius:11px;background:var(--card-2);display:grid;place-items:center;font-size:20px;border:1px solid var(--line)}
+  .apmeta{flex:1;min-width:0}
+  .apmeta .n{font-weight:800;font-size:14px}
+  .apmeta .w{color:var(--ink-soft);font-size:12px;font-weight:600}
+  .apok{background:var(--mint);color:#fff;border-radius:100px;font-weight:800;font-size:13px;padding:8px 14px;white-space:nowrap}
 
   #cfx{position:fixed;inset:0;pointer-events:none;z-index:50}
 
-  /* money pop-up */
   #pop{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(20,14,40,.55);backdrop-filter:blur(3px);padding:24px}
   #pop.on{display:flex;animation:fadein .2s ease}
   .popcard{background:var(--card);border-radius:28px;padding:30px 30px 28px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.45);animation:popin .55s cubic-bezier(.2,1.35,.4,1);max-width:320px}
@@ -231,10 +253,7 @@
         firebase.initializeApp(window.FIREBASE_CONFIG);
         this.ref = firebase.database().ref("coinclub/state");
         this.ref.on("value", function(snap){ onRemote(snap.val()); });
-        var self=this;
-        firebase.database().ref(".info/connected").on("value", function(s){
-          cloudOn = !!s.val(); render();
-        });
+        firebase.database().ref(".info/connected").on("value", function(s){ cloudOn = !!s.val(); render(); });
       }catch(e){ /* stays local-only */ }
     },
     push:function(s){
@@ -249,15 +268,14 @@
     if(!window.NTFY_TOPIC) return;
     try{
       fetch("https://ntfy.sh/"+window.NTFY_TOPIC, {
-        method:"POST",
-        headers:{ "Title":title, "Tags":"moneybag", "Click":location.href },
-        body:body
+        method:"POST", headers:{ "Title":title, "Tags":"moneybag", "Click":location.href }, body:body
       });
     }catch(e){}
   }
 
   /* ---------- helpers ---------- */
   var DAYS = ["Sa","Su","Mo","Tu","We","Th","Fr"];
+  var DAYFULL = ["Saturday","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday"];
   function startOfWeek(d){ var x=new Date(d); x.setHours(0,0,0,0); var diff=(x.getDay()-6+7)%7; x.setDate(x.getDate()-diff); return x; }
   function fmtWeek(iso){ var s=new Date(iso); var e=new Date(s); e.setDate(e.getDate()+6);
     var o={month:"short",day:"numeric"}; return s.toLocaleDateString(undefined,o)+" – "+e.toLocaleDateString(undefined,o); }
@@ -266,9 +284,96 @@
   function todayIdx(iso){ var i=Math.floor((new Date()-new Date(iso))/86400000); return i<0?-1:(i>6?-1:i); }
   function uid(){ return "id"+Math.random().toString(36).slice(2,9); }
 
+  /* ---------- icon set (searchable) ---------- */
+  var EMOJI = [
+    {e:"🧹",k:"broom sweep clean general chore"},{e:"🧽",k:"sponge scrub wash wipe clean"},
+    {e:"🧼",k:"soap wash hands clean"},{e:"🪣",k:"bucket mop water clean"},
+    {e:"🧴",k:"bottle spray lotion cleaner"},{e:"🧻",k:"paper towel toilet roll"},
+    {e:"🚮",k:"trash garbage rubbish litter"},{e:"🗑️",k:"trash can bin garbage"},
+    {e:"🪥",k:"toothbrush brush teeth"},{e:"🦷",k:"tooth teeth brush dental"},
+    {e:"🪞",k:"mirror clean bathroom"},{e:"🪟",k:"window glass clean"},
+    {e:"🛏️",k:"bed make bed bedroom sleep"},{e:"🛌",k:"sleep bed nap rest"},
+    {e:"🚽",k:"toilet bathroom clean"},{e:"🛁",k:"bath tub bathe wash dog"},
+    {e:"🚿",k:"shower wash bathe"},{e:"🧺",k:"laundry basket hamper clothes"},
+    {e:"🧦",k:"socks laundry clothes"},{e:"👕",k:"shirt clothes laundry dress"},
+    {e:"👚",k:"clothes blouse laundry"},{e:"👗",k:"dress clothes"},
+    {e:"🧥",k:"coat jacket closet"},{e:"👟",k:"shoes sneakers"},
+    {e:"🍽️",k:"plate dishes dinner dishwasher kitchen"},{e:"🍴",k:"fork knife utensils set table"},
+    {e:"🥄",k:"spoon utensil"},{e:"🔪",k:"knife cut kitchen"},
+    {e:"🍳",k:"cook egg pan breakfast kitchen"},{e:"🥘",k:"cook pot food dinner"},
+    {e:"🫖",k:"kettle tea pot"},{e:"☕",k:"coffee drink mug"},
+    {e:"🧊",k:"ice fridge freezer"},{e:"🧂",k:"salt season"},
+    {e:"🍞",k:"bread food kitchen"},{e:"🥛",k:"milk drink glass"},
+    {e:"🍎",k:"apple fruit snack"},{e:"🥕",k:"carrot vegetable food"},
+    {e:"🍪",k:"cookie treat snack"},{e:"🎂",k:"cake dessert birthday"},
+    {e:"🐶",k:"dog puppy feed pet"},{e:"🐕",k:"dog pet walk"},
+    {e:"🦮",k:"dog walk guide leash"},{e:"🐾",k:"paw pet poop yard dog"},
+    {e:"🦴",k:"bone dog treat"},{e:"🐱",k:"cat pet feed"},
+    {e:"🐟",k:"fish feed pet tank"},{e:"🐹",k:"hamster pet cage"},
+    {e:"💧",k:"water drink fresh drop"},{e:"🪴",k:"plant water pot houseplant"},
+    {e:"🌿",k:"plant leaves yard garden herb"},{e:"🌱",k:"seedling garden plant grow"},
+    {e:"🌳",k:"tree yard outdoor"},{e:"🍂",k:"leaves rake fall yard"},
+    {e:"🌸",k:"flower garden"},{e:"🧤",k:"gloves yard clean"},
+    {e:"🚗",k:"car wash vehicle"},{e:"🚙",k:"car suv vehicle"},
+    {e:"🛻",k:"truck vehicle haul"},{e:"🧰",k:"toolbox tools job fix general"},
+    {e:"🔨",k:"hammer fix build"},{e:"🪛",k:"screwdriver fix"},
+    {e:"🪚",k:"saw wood cut"},{e:"📦",k:"box move organize package"},
+    {e:"📚",k:"books homework study school read"},{e:"📖",k:"read book reading"},
+    {e:"📓",k:"notebook school write"},{e:"✏️",k:"pencil write homework"},
+    {e:"🖍️",k:"crayon color art"},{e:"🎒",k:"backpack bag school pack"},
+    {e:"🎵",k:"music instrument practice"},{e:"🎹",k:"piano music practice"},
+    {e:"🎸",k:"guitar music practice"},{e:"🎨",k:"art paint craft"},
+    {e:"🧩",k:"puzzle game"},{e:"⚽",k:"soccer sport ball practice"},
+    {e:"🏀",k:"basketball sport ball"},{e:"🚲",k:"bike bicycle ride"},
+    {e:"⭐",k:"star reward good"},{e:"🌟",k:"star sparkle reward"},
+    {e:"🏆",k:"trophy win reward"},{e:"🥇",k:"medal gold win first"},
+    {e:"💰",k:"money bag cash earn"},{e:"💵",k:"dollar cash money bill"},
+    {e:"🪙",k:"coin money gold"},{e:"🎁",k:"gift present reward"},
+    {e:"✅",k:"check done complete general"},{e:"☑️",k:"check box done task"},
+    {e:"📋",k:"clipboard list chore checklist general"},{e:"⏰",k:"clock alarm time"},
+    {e:"📅",k:"calendar schedule day"},{e:"🔔",k:"bell alert reminder"},
+    {e:"❤️",k:"heart love care"},{e:"👍",k:"thumbs up good"}
+  ];
+
+  /* ---------- chore library (by category) ---------- */
+  var CHORE_LIB = {
+    "Cleaning":[
+      {n:"Make your bed",e:"🛏️",f:"daily"},{n:"Tidy your room",e:"🧹",f:"2"},
+      {n:"Vacuum a room",e:"🧹",f:"1"},{n:"Dust the surfaces",e:"🧴",f:"1"},
+      {n:"Wipe the mirrors",e:"🪞",f:"1"},{n:"Take out the trash",e:"🚮",f:"2"},
+      {n:"Clean your bathroom",e:"🚽",f:"1"}
+    ],
+    "Kitchen":[
+      {n:"Dinner cleanup",e:"🍽️",f:"daily"},{n:"Load the dishwasher",e:"🍽️",f:"daily"},
+      {n:"Unload the dishwasher",e:"🍽️",f:"daily"},{n:"Wipe the counters",e:"🧽",f:"daily"},
+      {n:"Set the table",e:"🍴",f:"daily"},{n:"Sweep the kitchen floor",e:"🧹",f:"2"}
+    ],
+    "Laundry":[
+      {n:"Put away your laundry",e:"🧺",f:"1"},{n:"Sort dirty clothes",e:"🧦",f:"1"},
+      {n:"Bring hamper to laundry",e:"🧺",f:"1"},{n:"Fold the towels",e:"🧴",f:"1"}
+    ],
+    "Pets":[
+      {n:"Feed the dogs",e:"🐶",f:"daily"},{n:"Fresh water for the dogs",e:"💧",f:"daily"},
+      {n:"Walk the dog",e:"🦮",f:"daily"},{n:"Pick up the yard",e:"🐾",f:"2"},
+      {n:"Brush the dog",e:"🐕",f:"1"}
+    ],
+    "Outdoor / Yard":[
+      {n:"Water the plants",e:"🪴",f:"2"},{n:"Help with yard work",e:"🌿",f:"1"},
+      {n:"Sweep the porch",e:"🧹",f:"1"},{n:"Bring in the trash cans",e:"🗑️",f:"1"}
+    ],
+    "Self-care":[
+      {n:"Brush your teeth",e:"🪥",f:"daily"},{n:"Shower or bath",e:"🚿",f:"daily"},
+      {n:"Get dressed for the day",e:"👕",f:"daily"},{n:"Pack your backpack",e:"🎒",f:"daily"}
+    ],
+    "School":[
+      {n:"Do your homework",e:"📚",f:"daily"},{n:"Read for 20 minutes",e:"📖",f:"daily"},
+      {n:"Practice your instrument",e:"🎵",f:"daily"}
+    ]
+  };
+
   function defaultState(){
     return {
-      v:2, child:"Katia", base:20, pin:"11514",
+      v:3, child:"Katia", base:20, pin:"11514", sound:true,
       weekStart:startOfWeek(new Date()).toISOString(),
       required:[
         {id:"bed",     name:"Make your bed",          icon:"🛏️", layout:"week",  slots:7, need:6},
@@ -301,6 +406,7 @@
     if(typeof s.base!=="number") s.base = 20;
     if(!s.child) s.child = "Katia";
     if(!s.pin)   s.pin = "11514";
+    if(s.sound===undefined) s.sound = true;
     if(!s.weekStart) s.weekStart = startOfWeek(new Date()).toISOString();
     return s;
   }
@@ -316,13 +422,11 @@
 
   function save(){ Store.save(state); Sync.push(state); }
 
-  /* state-scoped helpers (work on any state object) */
   function marksOf(s,c){ var m=s.marks&&s.marks[c.id]; return (m&&m.length===c.slots)?m:new Array(c.slots).fill(0); }
   function approvedOf(s,c){ var n=0,m=marksOf(s,c); for(var i=0;i<m.length;i++) if(m[i]===2) n++; return n; }
   function securedOf(s,c){ return approvedOf(s,c) >= c.need; }
   function allSecuredOf(s){ return (s.required||[]).length>0 && s.required.every(function(c){return securedOf(s,c);}); }
 
-  /* current-state shortcuts */
   function marksFor(c){ var m=state.marks[c.id]; if(!m||m.length!==c.slots){ m=new Array(c.slots).fill(0); state.marks[c.id]=m; } return m; }
   function approvedCount(c){ return approvedOf(state,c); }
   function secured(c){ return securedOf(state,c); }
@@ -330,15 +434,15 @@
   function weekExtras(){ return (state.earnings||[]).filter(function(e){return e.week===state.weekStart;})
       .reduce(function(a,e){return a+e.amount;},0); }
   function projected(){ return (allSecured()?state.base:0) + weekExtras(); }
+  function findJob(id){ return state.jobs.find(function(x){return x.id===id;}); }
 
   /* ---------- incoming remote updates ---------- */
   var synced = false;
   function onRemote(remote){
-    if(!remote){                       // cloud empty → seed it from this device
-      Sync.push(state); synced = true; return;
-    }
+    if(!remote){ Sync.push(state); synced = true; return; }
     remote = normalize(remote);
-    if(synced && role === "katia"){    // celebrate approvals landing on Katia's phone
+    if(JSON.stringify(remote) === JSON.stringify(state)){ synced = true; return; }
+    if(synced && role === "katia"){
       var d = diffApprovals(state, remote);
       state = remote; Store.save(state); render();
       if(d.earning)      moneyPopup("+$"+d.earning.amount, d.earning.label+" — approved! 🎉");
@@ -348,7 +452,6 @@
     }
     state = remote; Store.save(state); synced = true; render();
   }
-
   function diffApprovals(o, n){
     var res = {};
     var oe=(o.earnings||[]).length, ne=(n.earnings||[]).length;
@@ -374,7 +477,7 @@
       '<header><div class="brand"><div class="coin">$</div>'+
       '<div><h1>'+esc(state.child)+"'s Coin Club</h1><small>"+sub+'</small></div></div>'+
       '<button class="rolechip '+(role==="parent"?"parent":"")+'" data-act="role"><span class="dot"></span>'+
-      (role==="parent"?"Parent":esc(state.child))+'</button></header>';
+      (role==="parent"?"Parent ✕":"🔒 Parent")+'</button></header>';
 
     var body = tab==="week" ? viewWeek()
              : tab==="jobs" ? viewJobs()
@@ -383,6 +486,7 @@
 
     app.innerHTML = head + body;
     renderNav();
+    if(dragId) markHot();
   }
 
   function viewWeek(){
@@ -413,7 +517,9 @@
 
     return pill + jar +
       '<div class="sectlabel">Required chores'+addBtn+'</div>' + list +
-      (role!=="parent" ? '<div class="hint" style="text-align:center;margin-top:6px">Tap a day to mark it done — a parent approves it ✓</div>' : "");
+      (role!=="parent"
+        ? '<div class="hint" style="text-align:center;margin-top:6px">Tap a day to mark it done — a parent approves it ✓</div>'
+        : '<div class="hint" style="text-align:center;margin-top:6px">Drag the ⠿ handle to reorder · tap a day-dot to approve</div>');
   }
 
   function choreCard(c){
@@ -434,12 +540,18 @@
       ? '<b>✓ Secured — nice!</b>'
       : goal + ' · '+ap+'/'+c.need+' done'+(pend?' <span class="pend">· '+pend+" waiting</span>":"");
 
-    var x = role==="parent" ? '<button class="cx" data-act="delchore" data-c="'+c.id+'">✕</button>' : "";
+    var right;
+    if(role==="parent"){
+      right = '<div class="cright"><button class="grip" data-grip="'+c.id+'" aria-label="Drag to reorder">⠿</button>'+
+              '<button class="cx" data-act="delchore" data-c="'+c.id+'" aria-label="Delete">✕</button></div>';
+    } else {
+      right = ok ? '<div class="checkmini">✓</div>' : "";
+    }
 
-    return '<section class="card chore '+(ok?"done":"")+'"><div class="top">'+
+    return '<section class="card chore '+(ok?"done":"")+'" data-cid="'+c.id+'"><div class="top">'+
       '<div class="cico">'+c.icon+'</div>'+
       '<div class="cmeta"><div class="name">'+esc(c.name)+'</div><div class="sub">'+sub+'</div></div>'+
-      (ok?'<div class="checkmini">✓</div>':x)+
+      right +
       '</div><div class="slots '+(c.layout==="stars"?"stars":"")+'">'+slots+'</div></section>';
   }
 
@@ -470,7 +582,6 @@
       else if(j.status==="open") open.push(j);
       else mine.push(j);
     });
-
     var out="";
     if(mine.length){ out += '<div class="sectlabel">In progress</div>' + mine.map(jobCard).join(""); }
     if(proposed.length){ out += '<div class="sectlabel">'+(role==="parent"?"Katia proposed":"Waiting for a parent")+'</div>' + proposed.map(jobCard).join(""); }
@@ -511,19 +622,15 @@
       '<section class="card bigtotal"><div class="lab">This Friday, '+esc(state.child)+' gets</div>'+
       '<div class="amt num">$'+tot+'</div>'+
       '<div class="brk"><span>Base $'+base+'</span><span>+ Extras $'+ex+'</span></div></section>';
-
     var brk = '<section class="card" style="padding:6px 16px"><div class="brkline"><span>Weekly chores '+
       (allSecured()?'<span class="tag perfect">secured</span>':'<span class="tag part">not yet</span>')+'</span><span class="v num">$'+base+'</span></div>'+
       '<div class="brkline"><span>Extra jobs done</span><span class="v num">$'+ex+'</span></div>'+
       '<div class="brkline"><span><b>Payday total</b></span><span class="v num">$'+tot+'</span></div></section>';
-
     var payBtn = role==="parent"
       ? '<button class="btn wide gold" data-act="pay" style="margin:14px 0" '+(tot<=0?"disabled":"")+'>💸 Pay $'+tot+' & start next week</button>'
       : '<div class="hint" style="text-align:center;margin:14px 0">A parent taps “Pay” on Friday to send it and start a fresh week.</div>';
-
     var stats = '<div class="stat2"><div class="card"><div class="k num">$'+state.lifetime+'</div><div class="l">Earned all-time</div></div>'+
       '<div class="card"><div class="k num">'+state.history.length+'</div><div class="l">Weeks paid</div></div></div>';
-
     var hist = state.history.length
       ? '<div class="sectlabel">Payday history</div><section class="card hist">'+
         state.history.slice(0,12).map(function(h){
@@ -532,7 +639,6 @@
             '<span class="num">$'+h.total+'</span></div>';
         }).join("")+'</section>'
       : "";
-
     return big + brk + payBtn + stats + hist;
   }
 
@@ -553,7 +659,7 @@
     }).join("")+'</div>';
     var settings = role==="parent"
       ? '<div class="sectlabel">Parent settings</div><section class="card" style="padding:8px 6px">'+
-        '<button class="btn wide ghost" data-act="settings" style="margin:6px 0">⚙️ Edit name, amount & PIN</button>'+
+        '<button class="btn wide ghost" data-act="settings" style="margin:6px 0">⚙️ Name, amount, PIN & sound</button>'+
         '<button class="btn wide coral" data-act="resetall" style="margin:6px 0">↺ Reset everything</button></section>'
       : "";
     return streak + '<div class="sectlabel">Badges</div>' + grid + settings;
@@ -579,16 +685,18 @@
     var jid=t.getAttribute("data-j");
     if(a==="claim"){ setJob(jid,"claimed"); return; }
     if(a==="unclaim"){ setJob(jid,"open"); return; }
-    if(a==="markjob"){ var j=findJob(jid); setJob(jid,"pending"); if(role==="katia"&&j) notify(state.child+" finished a job", j.name+" ($"+j.price+") — tap to approve"); return; }
+    if(a==="markjob"){ var j=findJob(jid); setJob(jid,"pending"); if(role==="katia"&&j){ notify(state.child+" finished a job", j.name+" ($"+j.price+") — tap to approve"); beepCoin(); } return; }
     if(a==="rejectjob"){ setJob(jid,"claimed"); return; }
     if(a==="payjob"){ payJob(jid); return; }
     if(a==="postjob"){ setJob(jid,"open"); return; }
-    if(a==="deljob"){ state.jobs=state.jobs.filter(function(j){return j.id!==jid;}); save(); render(); return; }
+    if(a==="deljob"){ state.jobs=state.jobs.filter(function(x){return x.id!==jid;}); save(); render(); return; }
     if(a==="addjob"){ jobSheet(); return; }
     if(a==="propose"){ proposeSheet(); return; }
 
     if(a==="addchore"){ choreSheet(); return; }
     if(a==="delchore"){ var cid=t.getAttribute("data-c"); state.required=state.required.filter(function(c){return c.id!==cid;}); delete state.marks[cid]; save(); render(); return; }
+
+    if(a==="approve"){ doApprove(t.getAttribute("data-kind"), t.getAttribute("data-id"), +t.getAttribute("data-i")); save(); burst(); render(); approvalSheet(); return; }
 
     if(a==="pay"){ confirmPay(); return; }
     if(a==="settings"){ settingsSheet(); return; }
@@ -597,17 +705,17 @@
     if(a==="closesheet"){ closeSheet(); return; }
   });
 
-  function findJob(id){ return state.jobs.find(function(x){return x.id===id;}); }
-
   function onSlot(cid,i){
     var c=state.required.find(function(x){return x.id===cid;}); if(!c) return;
     var m=marksFor(c), was=allSecured();
     if(role==="parent"){ m[i] = m[i]===2 ? 0 : 2; }
     else { if(m[i]===2) return; m[i] = m[i]===1 ? 0 : 1; }
+    var justDone = role==="katia" && m[i]===1;
     save();
-    if(role==="katia" && m[i]===1){ notify(state.child+" finished a chore", c.name+" — tap to approve ✓"); }
+    if(justDone){ notify(state.child+" finished a chore", c.name+" — tap to approve ✓"); beepCoin(); }
     if(!was && allSecured()) burst();
     render();
+    if(justDone) popSlot(cid,i);
   }
 
   function setRole(r){ role=r; render(); }
@@ -635,6 +743,36 @@
     };
   }
 
+  /* ---------- approvals ---------- */
+  function pendingApprovals(){
+    var items=[];
+    state.required.forEach(function(c){ marksFor(c).forEach(function(v,i){ if(v===1) items.push({kind:"chore",id:c.id,i:i,icon:c.icon,name:c.name,when:(c.layout==="week"?DAYFULL[i]:"this week")}); }); });
+    state.jobs.forEach(function(j){ if(j.status==="pending") items.push({kind:"job",id:j.id,i:-1,icon:j.icon,name:j.name,amount:j.price}); });
+    return items;
+  }
+  function showApprovalsIfAny(){ if(pendingApprovals().length) approvalSheet(); }
+  function approvalSheet(){
+    var items=pendingApprovals();
+    if(!items.length){ closeSheet(); return; }
+    var rows=items.map(function(it){
+      var right = it.kind==="job" ? ("Extra job · $"+it.amount) : it.when;
+      return '<div class="aprow"><div class="apico">'+it.icon+'</div>'+
+        '<div class="apmeta"><div class="n">'+esc(it.name)+'</div><div class="w">'+esc(right)+'</div></div>'+
+        '<button class="apok" data-act="approve" data-kind="'+it.kind+'" data-id="'+it.id+'" data-i="'+it.i+'">Approve ✓</button></div>';
+    }).join("");
+    openSheet('<h3>Needs your approval ('+items.length+')</h3>'+
+      '<div style="max-height:52vh;overflow-y:auto">'+rows+'</div>'+
+      '<div class="sheetbtns"><button class="btn wide ghost" data-act="closesheet">Close</button>'+
+      '<button class="btn wide mint" id="__all">Approve all</button></div>');
+    document.getElementById("__all").onclick=function(){
+      items.forEach(function(it){ doApprove(it.kind,it.id,it.i); }); save(); burst(); render(); approvalSheet();
+    };
+  }
+  function doApprove(kind,id,i){
+    if(kind==="chore"){ var c=state.required.find(function(x){return x.id===id;}); if(c){ marksFor(c)[i]=2; } }
+    else { var j=findJob(id); if(j){ state.earnings.push({id:uid(),label:j.name,amount:j.price,week:state.weekStart,ts:Date.now()}); if(j.proposed) state.jobs=state.jobs.filter(function(x){return x.id!==id;}); else j.status="open"; } }
+  }
+
   /* ---------- sheets ---------- */
   var scrim=document.getElementById("scrim"), sheet=document.getElementById("sheet");
   function openSheet(html){ sheet.innerHTML=html; scrim.classList.add("on"); }
@@ -646,41 +784,80 @@
   function askPin(){
     openSheet('<h3>Parent mode 🔒</h3>'+
       '<p style="color:var(--ink-soft);font-weight:600;font-size:13px;margin-top:-6px">Enter the parent PIN so approvals stay with mom &amp; dad.</p>'+
-      '<div class="field"><input id="pin" type="tel" inputmode="numeric" maxlength="8" placeholder="••••" style="text-align:center;letter-spacing:8px;font-size:22px"></div>'+
+      '<div class="field"><input id="pin" type="tel" inputmode="numeric" maxlength="8" placeholder="•••••" style="text-align:center;letter-spacing:8px;font-size:22px"></div>'+
       sheetButtons("Unlock"));
     var inp=document.getElementById("pin"); inp.focus();
     document.getElementById("__ok").onclick=function(){
-      if(inp.value===String(state.pin)){ closeSheet(); setRole("parent"); }
+      if(inp.value===String(state.pin)){ closeSheet(); setRole("parent"); showApprovalsIfAny(); }
       else { inp.value=""; inp.placeholder="wrong PIN"; inp.style.borderColor="var(--coral)"; }
     };
   }
 
-  var EMO_CHORE=["🛏️","🐶","🍽️","🧹","🧺","🚮","🪥","📚","🌱","🐟","🧦","🧴"];
-  var EMO_JOB=["🚗","🛁","🧽","🧹","🌿","🚮","🪟","🧊","📦","🍳","🐕","🧼"];
+  /* ---------- searchable icon picker ---------- */
+  function iconPicker(current){
+    return '<div class="iconpick" data-sel="'+esc(current)+'">'+
+      '<div class="iconhead"><div class="iconcur" id="iconcur">'+current+'</div>'+
+      '<input class="iconsearch" id="iconsearch" placeholder="Search icons… bed, dog, dishes" autocomplete="off"></div>'+
+      '<div class="icongrid" id="icongrid">'+iconGridHTML("")+'</div></div>';
+  }
+  function iconGridHTML(q){
+    q=(q||"").toLowerCase().trim();
+    var list=EMOJI.filter(function(x){ return !q || x.k.indexOf(q)!==-1; });
+    if(!list.length) return '<div class="iconnone">No icons match “'+esc(q)+'”</div>';
+    return list.map(function(x){ return '<button type="button" class="iconopt" data-emo="'+x.e+'">'+x.e+'</button>'; }).join("");
+  }
+  function wireIcon(){
+    var wrap=document.querySelector(".iconpick"); if(!wrap) return;
+    var grid=document.getElementById("icongrid"), search=document.getElementById("iconsearch"), cur=document.getElementById("iconcur");
+    search.addEventListener("input", function(){ grid.innerHTML=iconGridHTML(search.value); });
+    grid.addEventListener("click", function(e){ var b=e.target.closest("[data-emo]"); if(!b) return;
+      wrap.dataset.sel=b.getAttribute("data-emo"); cur.textContent=wrap.dataset.sel;
+      [].forEach.call(grid.children,function(c){c.classList.remove("sel");}); b.classList.add("sel"); });
+  }
+  function pickedEmo(fallback){ var w=document.querySelector(".iconpick"); return (w&&w.dataset.sel)||fallback; }
 
-  function pickerHTML(list,sel){ return '<div class="emojirow" id="emo">'+list.map(function(e){
-    return '<button type="button" data-e="'+e+'" class="'+(e===sel?"sel":"")+'">'+e+'</button>';}).join("")+'</div>'; }
-  function wirePicker(){ var box=document.getElementById("emo"); if(!box)return;
-    box.addEventListener("click",function(e){ var b=e.target.closest("[data-e]"); if(!b)return;
-      [].forEach.call(box.children,function(c){c.classList.remove("sel");}); b.classList.add("sel"); box.dataset.sel=b.getAttribute("data-e"); }); }
-  function pickedEmo(fallback){ var box=document.getElementById("emo"); return (box&&box.dataset.sel)||fallback; }
+  function libSelectHTML(){
+    var html='<select id="lib"><option value="">✍️ Make your own…</option>';
+    Object.keys(CHORE_LIB).forEach(function(cat){
+      html+='<optgroup label="'+cat+'">';
+      CHORE_LIB[cat].forEach(function(it,idx){ html+='<option value="'+cat+'::'+idx+'">'+it.e+' '+esc(it.n)+'</option>'; });
+      html+='</optgroup>';
+    });
+    return html+'</select>';
+  }
+  function wireLib(){
+    var sel=document.getElementById("lib"); if(!sel) return;
+    sel.addEventListener("change", function(){
+      var v=sel.value; if(!v) return;
+      var parts=v.split("::"), it=CHORE_LIB[parts[0]][+parts[1]]; if(!it) return;
+      document.getElementById("cn").value=it.n;
+      var cl=document.getElementById("cl"); if(cl) cl.value=it.f;
+      var w=document.querySelector(".iconpick"); if(w){ w.dataset.sel=it.e; var c=document.getElementById("iconcur"); if(c) c.textContent=it.e; }
+    });
+  }
+
+  function freqSelectHTML(cur){
+    function o(v,l){ return '<option value="'+v+'"'+(v===cur?" selected":"")+'>'+l+'</option>'; }
+    return '<select id="cl">'+o("daily","Every day (needs 6 of 7)")+o("2","Twice a week")+o("1","Once a week")+o("3","3× a week")+'</select>';
+  }
+  function freqOf(c){ return c.layout==="week" ? "daily" : String(c.need); }
+  function applyFreq(chore,v){
+    if(v==="daily"){ chore.layout="week"; chore.slots=7; chore.need=6; }
+    else { var n=+v; chore.layout="stars"; chore.slots=n; chore.need=n; }
+  }
 
   function choreSheet(){
     openSheet('<h3>New required chore</h3>'+
-      '<div class="field"><label>What is it?</label><input id="cn" placeholder="e.g. Feed the fish"></div>'+
-      '<div class="field"><label>Pick an icon</label>'+pickerHTML(EMO_CHORE,"🧹")+'</div>'+
-      '<div class="field"><label>How often?</label><select id="cl">'+
-        '<option value="daily">Every day (needs 6 of 7)</option>'+
-        '<option value="2">Twice a week</option>'+
-        '<option value="1">Once a week</option>'+
-        '<option value="3">3× a week</option></select></div>'+
+      '<div class="field"><label>Start from the chore library</label>'+libSelectHTML()+'</div>'+
+      '<div class="field"><label>Name</label><input id="cn" placeholder="e.g. Feed the fish"></div>'+
+      '<div class="field"><label>Icon</label>'+iconPicker("🧹")+'</div>'+
+      '<div class="field"><label>How often?</label>'+freqSelectHTML("daily")+'</div>'+
       sheetButtons("Add chore"));
-    wirePicker();
+    wireIcon(); wireLib();
     document.getElementById("__ok").onclick=function(){
       var name=document.getElementById("cn").value.trim(); if(!name) return;
-      var v=document.getElementById("cl").value, chore;
-      if(v==="daily") chore={id:uid(),name:name,icon:pickedEmo("🧹"),layout:"week",slots:7,need:6};
-      else { var n=+v; chore={id:uid(),name:name,icon:pickedEmo("🧹"),layout:"stars",slots:n,need:n}; }
+      var chore={id:uid(),name:name,icon:pickedEmo("🧹")};
+      applyFreq(chore, document.getElementById("cl").value);
       state.required.push(chore); save(); closeSheet(); render();
     };
   }
@@ -688,14 +865,14 @@
   function jobSheet(){
     openSheet('<h3>New extra job</h3>'+
       '<div class="field"><label>Job</label><input id="jn" placeholder="e.g. Sweep the garage"></div>'+
-      '<div class="field"><label>Icon</label>'+pickerHTML(EMO_JOB,"🧹")+'</div>'+
+      '<div class="field"><label>Icon</label>'+iconPicker("🧰")+'</div>'+
       '<div class="field"><label>Pays ($)</label><input id="jp" type="tel" inputmode="numeric" placeholder="5"></div>'+
       sheetButtons("Post job"));
-    wirePicker();
+    wireIcon();
     document.getElementById("__ok").onclick=function(){
       var name=document.getElementById("jn").value.trim(), price=parseInt(document.getElementById("jp").value,10);
       if(!name||!(price>=0)) return;
-      state.jobs.push({id:uid(),name:name,icon:pickedEmo("🧹"),price:price,status:"open"}); save(); closeSheet(); render();
+      state.jobs.push({id:uid(),name:name,icon:pickedEmo("🧰"),price:price,status:"open"}); save(); closeSheet(); render();
     };
   }
 
@@ -703,10 +880,10 @@
     openSheet('<h3>Suggest a job 💡</h3>'+
       '<p style="color:var(--ink-soft);font-weight:600;font-size:13px;margin-top:-6px">Tell mom or dad what you\'d like to do. They\'ll set the price and post it.</p>'+
       '<div class="field"><label>What would you do?</label><input id="jn" placeholder="e.g. Organize the pantry"></div>'+
-      '<div class="field"><label>Icon</label>'+pickerHTML(EMO_JOB,"💡")+'</div>'+
+      '<div class="field"><label>Icon</label>'+iconPicker("💡")+'</div>'+
       '<div class="field"><label>How much is it worth? (optional)</label><input id="jp" type="tel" inputmode="numeric" placeholder="$"></div>'+
       sheetButtons("Send it"));
-    wirePicker();
+    wireIcon();
     document.getElementById("__ok").onclick=function(){
       var name=document.getElementById("jn").value.trim(); if(!name) return;
       var price=parseInt(document.getElementById("jp").value,10); if(!(price>=0)) price=0;
@@ -720,11 +897,13 @@
       '<div class="field"><label>Child\'s name</label><input id="sn" value="'+esc(state.child)+'"></div>'+
       '<div class="field"><label>Weekly base ($)</label><input id="sb" type="tel" inputmode="numeric" value="'+state.base+'"></div>'+
       '<div class="field"><label>Parent PIN</label><input id="sp" type="tel" inputmode="numeric" value="'+esc(state.pin)+'"></div>'+
+      '<div class="field"><label>Tap sounds</label><select id="ss"><option value="on"'+(state.sound!==false?" selected":"")+'>On</option><option value="off"'+(state.sound===false?" selected":"")+'>Off</option></select></div>'+
       sheetButtons("Save"));
     document.getElementById("__ok").onclick=function(){
       state.child=document.getElementById("sn").value.trim()||state.child;
       var b=parseInt(document.getElementById("sb").value,10); if(b>=0) state.base=b;
       var p=document.getElementById("sp").value.trim(); if(p) state.pin=p;
+      state.sound=document.getElementById("ss").value!=="off";
       save(); closeSheet(); render();
     };
   }
@@ -735,14 +914,56 @@
     document.getElementById("__ok").onclick=function(){ state=defaultState(); role="katia"; tab="week"; save(); closeSheet(); render(); };
   }
 
+  /* ---------- drag to reorder chores (parent) ---------- */
+  var dragId=null;
+  function idxOf(id){ return state.required.findIndex(function(c){return c.id===id;}); }
+  function markHot(){ if(!dragId) return; var c=document.querySelector('[data-cid="'+dragId+'"]'); if(c) c.classList.add("draghot"); }
+  document.addEventListener("pointerdown", function(e){
+    var g=e.target.closest("[data-grip]"); if(!g) return;
+    dragId=g.getAttribute("data-grip"); document.body.classList.add("dragging"); markHot(); e.preventDefault();
+  }, {passive:false});
+  document.addEventListener("pointermove", function(e){
+    if(!dragId) return; e.preventDefault();
+    var el=document.elementFromPoint(e.clientX, e.clientY); var card=el&&el.closest("[data-cid]"); if(!card) return;
+    var over=card.getAttribute("data-cid"); if(!over||over===dragId) return;
+    var from=idxOf(dragId), to=idxOf(over); if(from<0||to<0) return;
+    var moved=state.required.splice(from,1)[0]; state.required.splice(to,0,moved);
+    render();
+  }, {passive:false});
+  function endDrag(){ if(!dragId) return; dragId=null; document.body.classList.remove("dragging"); save(); render(); }
+  document.addEventListener("pointerup", endDrag);
+  document.addEventListener("pointercancel", endDrag);
+
+  /* ---------- coin sound + slot pop ---------- */
+  var actx=null;
+  function beepCoin(){
+    if(state.sound===false) return;
+    try{
+      actx = actx || new (window.AudioContext||window.webkitAudioContext)();
+      if(actx.state==="suspended") actx.resume();
+      var t=actx.currentTime;
+      [[988,0],[1319,0.09]].forEach(function(p){
+        var o=actx.createOscillator(), g=actx.createGain();
+        o.type="triangle"; o.frequency.value=p[0];
+        g.gain.setValueAtTime(0.0001,t+p[1]);
+        g.gain.exponentialRampToValueAtTime(0.28,t+p[1]+0.015);
+        g.gain.exponentialRampToValueAtTime(0.0001,t+p[1]+0.2);
+        o.connect(g); g.connect(actx.destination); o.start(t+p[1]); o.stop(t+p[1]+0.22);
+      });
+    }catch(e){}
+  }
+  function popSlot(cid,i){
+    var el=document.querySelector('[data-act="slot"][data-c="'+cid+'"][data-i="'+i+'"]');
+    if(el){ el.classList.add("pop"); setTimeout(function(){ el.classList.remove("pop"); },340); }
+  }
+
   /* ---------- money pop-up ---------- */
   var pop=document.getElementById("pop"), popTimer=null;
   function moneyPopup(big, sub){
     pop.innerHTML='<div class="popcard"><div class="popcoin">🪙</div>'+
       '<div class="popbig num">'+esc(big)+'</div><div class="popsub">'+esc(sub)+'</div>'+
       '<div class="poptap">tap to close</div></div>';
-    pop.classList.add("on");
-    burst();
+    pop.classList.add("on"); burst(); beepCoin();
     clearTimeout(popTimer); popTimer=setTimeout(function(){ pop.classList.remove("on"); }, 3200);
   }
   pop.addEventListener("click", function(){ pop.classList.remove("on"); });
