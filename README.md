@@ -10,7 +10,7 @@ Runs as a home-screen web app (PWA). Open the site on a phone and use **Share �
 - **Wallet** — Friday payout total + all-time earnings; parent taps *Pay* to roll to a new week.
 - **Wins** — streak and badges.
 
-Parent mode is behind a PIN (default `2468`, change it in Settings).
+Parent mode is behind a PIN (default `11514`, change it in Settings).
 
-> Note: this version stores data on each device by itself. Cross-device live sync can be added
-> without changing the hosting.
+Live sync across phones is powered by Firebase Realtime Database (see `firebase-config.js`).
+Parent push notifications use [ntfy.sh](https://ntfy.sh) — subscribe to the topic in `firebase-config.js`.

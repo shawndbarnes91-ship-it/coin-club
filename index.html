@@ -15,6 +15,9 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
 <style>
   :root{
     --grape:#7C5CFC; --grape-ink:#5B3FE0; --grape-soft:#EDE8FF;
@@ -183,6 +186,19 @@
   .sheetbtns{display:flex;gap:10px;margin-top:8px}
 
   #cfx{position:fixed;inset:0;pointer-events:none;z-index:50}
+
+  /* money pop-up */
+  #pop{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(20,14,40,.55);backdrop-filter:blur(3px);padding:24px}
+  #pop.on{display:flex;animation:fadein .2s ease}
+  .popcard{background:var(--card);border-radius:28px;padding:30px 30px 28px;text-align:center;box-shadow:0 24px 70px rgba(0,0,0,.45);animation:popin .55s cubic-bezier(.2,1.35,.4,1);max-width:320px}
+  .popcoin{font-size:66px;line-height:1;animation:spin .9s ease}
+  .popbig{font-family:var(--font-round);font-weight:800;font-size:34px;color:var(--gold);margin-top:8px;letter-spacing:-.5px}
+  .popsub{font-weight:700;color:var(--ink);margin-top:4px;font-size:15.5px}
+  .poptap{color:var(--ink-soft);font-weight:600;font-size:12px;margin-top:14px}
+  @keyframes popin{0%{transform:scale(.5) translateY(20px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+  @keyframes spin{0%{transform:rotateY(0) scale(.5)}100%{transform:rotateY(360deg) scale(1)}}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -191,19 +207,56 @@
 <div class="app" id="app"></div>
 <nav id="nav"></nav>
 <div class="scrim" id="scrim"><div class="sheet" id="sheet"></div></div>
+<div id="pop"></div>
 <canvas id="cfx"></canvas>
 
 <script>
 (function(){
   "use strict";
 
-  /* ---------- storage (swap this block for cloud sync later) ---------- */
-  var KEY = "katia-coin-club-v2";
+  /* ---------- local cache ---------- */
+  var KEY = "katia-coin-club-v3";
   var Store = {
     load:function(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } },
     save:function(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
   };
 
+  /* ---------- live sync (Firebase Realtime Database) ---------- */
+  var cloudOn = false;
+  var Sync = {
+    ref:null, t:null,
+    init:function(onRemote){
+      if(!window.FIREBASE_CONFIG || !window.firebase){ return; }
+      try{
+        firebase.initializeApp(window.FIREBASE_CONFIG);
+        this.ref = firebase.database().ref("coinclub/state");
+        this.ref.on("value", function(snap){ onRemote(snap.val()); });
+        var self=this;
+        firebase.database().ref(".info/connected").on("value", function(s){
+          cloudOn = !!s.val(); render();
+        });
+      }catch(e){ /* stays local-only */ }
+    },
+    push:function(s){
+      if(!this.ref) return;
+      var self=this; clearTimeout(this.t);
+      this.t=setTimeout(function(){ try{ self.ref.set(s); }catch(e){} }, 250);
+    }
+  };
+
+  /* ---------- notifications to parents (ntfy.sh) ---------- */
+  function notify(title, body){
+    if(!window.NTFY_TOPIC) return;
+    try{
+      fetch("https://ntfy.sh/"+window.NTFY_TOPIC, {
+        method:"POST",
+        headers:{ "Title":title, "Tags":"moneybag", "Click":location.href },
+        body:body
+      });
+    }catch(e){}
+  }
+
+  /* ---------- helpers ---------- */
   var DAYS = ["Sa","Su","Mo","Tu","We","Th","Fr"];
   function startOfWeek(d){ var x=new Date(d); x.setHours(0,0,0,0); var diff=(x.getDay()-6+7)%7; x.setDate(x.getDate()-diff); return x; }
   function fmtWeek(iso){ var s=new Date(iso); var e=new Date(s); e.setDate(e.getDate()+6);
@@ -215,7 +268,7 @@
 
   function defaultState(){
     return {
-      v:2, child:"Katia", base:20, pin:"2468",
+      v:2, child:"Katia", base:20, pin:"11514",
       weekStart:startOfWeek(new Date()).toISOString(),
       required:[
         {id:"bed",     name:"Make your bed",          icon:"🛏️", layout:"week",  slots:7, need:6},
@@ -238,7 +291,21 @@
     };
   }
 
-  var state = Store.load() || defaultState();
+  function normalize(s){
+    if(!s) return defaultState();
+    s.required = s.required || [];
+    s.jobs     = s.jobs || [];
+    s.earnings = s.earnings || [];
+    s.history  = s.history || [];
+    s.marks    = s.marks || {};
+    if(typeof s.base!=="number") s.base = 20;
+    if(!s.child) s.child = "Katia";
+    if(!s.pin)   s.pin = "11514";
+    if(!s.weekStart) s.weekStart = startOfWeek(new Date()).toISOString();
+    return s;
+  }
+
+  var state = normalize(Store.load() || defaultState());
   var role = "katia";
   var tab  = "week";
 
@@ -247,22 +314,65 @@
     if(state.weekStart !== cur){ state.weekStart = cur; state.marks = {}; save(); }
   })();
 
-  function save(){ Store.save(state); }
+  function save(){ Store.save(state); Sync.push(state); }
+
+  /* state-scoped helpers (work on any state object) */
+  function marksOf(s,c){ var m=s.marks&&s.marks[c.id]; return (m&&m.length===c.slots)?m:new Array(c.slots).fill(0); }
+  function approvedOf(s,c){ var n=0,m=marksOf(s,c); for(var i=0;i<m.length;i++) if(m[i]===2) n++; return n; }
+  function securedOf(s,c){ return approvedOf(s,c) >= c.need; }
+  function allSecuredOf(s){ return (s.required||[]).length>0 && s.required.every(function(c){return securedOf(s,c);}); }
+
+  /* current-state shortcuts */
   function marksFor(c){ var m=state.marks[c.id]; if(!m||m.length!==c.slots){ m=new Array(c.slots).fill(0); state.marks[c.id]=m; } return m; }
-  function approvedCount(c){ return marksFor(c).filter(function(x){return x===2;}).length; }
-  function secured(c){ return approvedCount(c) >= c.need; }
-  function allSecured(){ return state.required.length>0 && state.required.every(secured); }
-  function weekExtras(){ return state.earnings.filter(function(e){return e.week===state.weekStart;})
+  function approvedCount(c){ return approvedOf(state,c); }
+  function secured(c){ return securedOf(state,c); }
+  function allSecured(){ return allSecuredOf(state); }
+  function weekExtras(){ return (state.earnings||[]).filter(function(e){return e.week===state.weekStart;})
       .reduce(function(a,e){return a+e.amount;},0); }
   function projected(){ return (allSecured()?state.base:0) + weekExtras(); }
 
+  /* ---------- incoming remote updates ---------- */
+  var synced = false;
+  function onRemote(remote){
+    if(!remote){                       // cloud empty → seed it from this device
+      Sync.push(state); synced = true; return;
+    }
+    remote = normalize(remote);
+    if(synced && role === "katia"){    // celebrate approvals landing on Katia's phone
+      var d = diffApprovals(state, remote);
+      state = remote; Store.save(state); render();
+      if(d.earning)      moneyPopup("+$"+d.earning.amount, d.earning.label+" — approved! 🎉");
+      else if(d.secured) moneyPopup("$"+state.base+" locked in!", "You finished every chore this week! 🎉");
+      else if(d.chore)   moneyPopup("Approved! ✓", d.chore);
+      return;
+    }
+    state = remote; Store.save(state); synced = true; render();
+  }
+
+  function diffApprovals(o, n){
+    var res = {};
+    var oe=(o.earnings||[]).length, ne=(n.earnings||[]).length;
+    if(ne>oe){ var last=n.earnings[ne-1]; if(last) res.earning={amount:last.amount,label:last.label}; }
+    var newChore=null;
+    (n.required||[]).forEach(function(c){
+      var oc=(o.required||[]).find(function(x){return x.id===c.id;});
+      var oa = oc ? approvedOf(o,oc) : 0;
+      if(approvedOf(n,c) > oa) newChore = c.name;
+    });
+    if(allSecuredOf(n) && !allSecuredOf(o)) res.secured = true;
+    if(newChore) res.chore = newChore;
+    return res;
+  }
+
+  /* ---------- render ---------- */
   var app = document.getElementById("app");
   function esc(s){ return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}); }
 
   function render(){
+    var sub = "$"+state.base+" a week + extra jobs" + (cloudOn ? " · ☁️ synced" : "");
     var head =
       '<header><div class="brand"><div class="coin">$</div>'+
-      '<div><h1>'+esc(state.child)+"'s Coin Club</h1><small>$"+state.base+' a week + extra jobs</small></div></div>'+
+      '<div><h1>'+esc(state.child)+"'s Coin Club</h1><small>"+sub+'</small></div></div>'+
       '<button class="rolechip '+(role==="parent"?"parent":"")+'" data-act="role"><span class="dot"></span>'+
       (role==="parent"?"Parent":esc(state.child))+'</button></header>';
 
@@ -457,6 +567,7 @@
     }).join("");
   }
 
+  /* ---------- actions ---------- */
   document.addEventListener("click", function(ev){
     var t = ev.target.closest("[data-act]"); if(!t) return;
     var a = t.getAttribute("data-act");
@@ -468,7 +579,7 @@
     var jid=t.getAttribute("data-j");
     if(a==="claim"){ setJob(jid,"claimed"); return; }
     if(a==="unclaim"){ setJob(jid,"open"); return; }
-    if(a==="markjob"){ setJob(jid,"pending"); return; }
+    if(a==="markjob"){ var j=findJob(jid); setJob(jid,"pending"); if(role==="katia"&&j) notify(state.child+" finished a job", j.name+" ($"+j.price+") — tap to approve"); return; }
     if(a==="rejectjob"){ setJob(jid,"claimed"); return; }
     if(a==="payjob"){ payJob(jid); return; }
     if(a==="postjob"){ setJob(jid,"open"); return; }
@@ -486,20 +597,23 @@
     if(a==="closesheet"){ closeSheet(); return; }
   });
 
+  function findJob(id){ return state.jobs.find(function(x){return x.id===id;}); }
+
   function onSlot(cid,i){
     var c=state.required.find(function(x){return x.id===cid;}); if(!c) return;
     var m=marksFor(c), was=allSecured();
     if(role==="parent"){ m[i] = m[i]===2 ? 0 : 2; }
     else { if(m[i]===2) return; m[i] = m[i]===1 ? 0 : 1; }
     save();
+    if(role==="katia" && m[i]===1){ notify(state.child+" finished a chore", c.name+" — tap to approve ✓"); }
     if(!was && allSecured()) burst();
     render();
   }
 
   function setRole(r){ role=r; render(); }
-  function setJob(id,status){ var j=state.jobs.find(function(x){return x.id===id;}); if(j){ j.status=status; save(); render(); } }
+  function setJob(id,status){ var j=findJob(id); if(j){ j.status=status; save(); render(); } }
   function payJob(id){
-    var j=state.jobs.find(function(x){return x.id===id;}); if(!j) return;
+    var j=findJob(id); if(!j) return;
     state.earnings.push({id:uid(),label:j.name,amount:j.price,week:state.weekStart,ts:Date.now()});
     if(j.proposed){ state.jobs=state.jobs.filter(function(x){return x.id!==id;}); }
     else j.status="open";
@@ -512,15 +626,16 @@
       '<p style="color:var(--ink-soft);font-weight:600;font-size:13.5px;margin-top:-6px">This logs the payday and starts a fresh Saturday–Friday week. Do your bank transfer for <b>$'+tot+'</b>, then confirm.</p>'+
       sheetButtons("Confirm payday"));
     document.getElementById("__ok").onclick=function(){
-      var perfect=allSecured(), ex=weekExtras(), base=perfect?state.base:0, tot=base+ex;
-      state.lifetime+=tot; state.lifetimeExtras+=ex;
+      var perfect=allSecured(), ex=weekExtras(), base=perfect?state.base:0, total=base+ex;
+      state.lifetime+=total; state.lifetimeExtras+=ex;
       if(perfect){ state.perfectWeeks++; state.streak++; } else state.streak=0;
-      state.history.unshift({week:state.weekStart,base:base,extras:ex,total:tot,perfect:perfect,ts:Date.now()});
+      state.history.unshift({week:state.weekStart,base:base,extras:ex,total:total,perfect:perfect,ts:Date.now()});
       state.weekStart=startOfWeek(new Date()).toISOString(); state.marks={};
       save(); closeSheet(); tab="wallet"; burst(); render();
     };
   }
 
+  /* ---------- sheets ---------- */
   var scrim=document.getElementById("scrim"), sheet=document.getElementById("sheet");
   function openSheet(html){ sheet.innerHTML=html; scrim.classList.add("on"); }
   function closeSheet(){ scrim.classList.remove("on"); }
@@ -596,6 +711,7 @@
       var name=document.getElementById("jn").value.trim(); if(!name) return;
       var price=parseInt(document.getElementById("jp").value,10); if(!(price>=0)) price=0;
       state.jobs.push({id:uid(),name:name,icon:pickedEmo("💡"),price:price,status:"proposed",proposed:true}); save(); closeSheet(); render();
+      notify(state.child+" suggested a job 💡", name+(price?(" (thinks $"+price+")"):""));
     };
   }
 
@@ -619,6 +735,19 @@
     document.getElementById("__ok").onclick=function(){ state=defaultState(); role="katia"; tab="week"; save(); closeSheet(); render(); };
   }
 
+  /* ---------- money pop-up ---------- */
+  var pop=document.getElementById("pop"), popTimer=null;
+  function moneyPopup(big, sub){
+    pop.innerHTML='<div class="popcard"><div class="popcoin">🪙</div>'+
+      '<div class="popbig num">'+esc(big)+'</div><div class="popsub">'+esc(sub)+'</div>'+
+      '<div class="poptap">tap to close</div></div>';
+    pop.classList.add("on");
+    burst();
+    clearTimeout(popTimer); popTimer=setTimeout(function(){ pop.classList.remove("on"); }, 3200);
+  }
+  pop.addEventListener("click", function(){ pop.classList.remove("on"); });
+
+  /* ---------- confetti ---------- */
   var cv=document.getElementById("cfx"), ctx=cv.getContext("2d"), parts=[], raf=null;
   function size(){ cv.width=innerWidth; cv.height=innerHeight; } size(); addEventListener("resize",size);
   function burst(){
@@ -638,7 +767,9 @@
     if(alive) raf=requestAnimationFrame(tick); else { raf=null; parts=[]; ctx.clearRect(0,0,cv.width,cv.height); }
   }
 
+  /* ---------- boot ---------- */
   render();
+  Sync.init(onRemote);
 })();
 </script>
 <script>
