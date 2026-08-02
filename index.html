@@ -236,6 +236,8 @@
 
   /* ---------- local cache ---------- */
   var KEY = "katia-coin-club-v3";
+  var APP_VERSION = "v6";
+  var deviceId = (function(){ try{ var d=localStorage.getItem("coinclub-device"); if(!d){ d="d"+Math.random().toString(36).slice(2,9); localStorage.setItem("coinclub-device",d);} return d; }catch(e){ return "d"+Math.random().toString(36).slice(2,9); } })();
   var Store = {
     load:function(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } },
     save:function(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
@@ -251,10 +253,10 @@
       fetch("https://ntfy.sh/"+this.topic+"/json?poll=1&since=12h", {cache:"no-store"})
         .then(function(r){ return r.ok ? r.text() : ""; })
         .then(function(txt){
-          var latest=null;
+          var best=null, bestRev=-1;
           (txt||"").split("\n").forEach(function(line){ line=line.trim(); if(!line) return;
-            try{ var m=JSON.parse(line); if(m.event==="message" && m.message && m.message.charAt(0)==="{") latest=m.message; }catch(e){} });
-          if(latest){ try{ self.cb(JSON.parse(latest)); }catch(e){} }
+            try{ var m=JSON.parse(line); if(m.event==="message" && m.message && m.message.charAt(0)==="{"){ var st=JSON.parse(m.message); var r=st.rev||0; if(r>=bestRev){ bestRev=r; best=st; } } }catch(e){} });
+          if(best){ self.cb(best); }
           else { self.publish(state); }
           cloudOn=true; render(); self.listen();
         })
@@ -425,6 +427,7 @@
   }
 
   var state = normalize(Store.load() || defaultState());
+  var lastRev = state.rev || 0;
   var role = "katia";
   var tab  = "week";
 
@@ -433,7 +436,7 @@
     if(state.weekStart !== cur){ state.weekStart = cur; state.marks = {}; save(); }
   })();
 
-  function save(){ pruneState(); Store.save(state); Sync.push(state); }
+  function save(){ pruneState(); lastRev = Math.max(lastRev, state.rev||0) + 1; state.rev = lastRev; state.by = deviceId; Store.save(state); Sync.push(state); }
   function pruneState(){
     if(state.earnings && state.earnings.length) state.earnings=state.earnings.filter(function(e){ return e.week===state.weekStart; });
     if(state.history && state.history.length>10) state.history=state.history.slice(0,10);
@@ -460,16 +463,18 @@
   function onRemote(remote){
     if(!remote){ Sync.push(state); synced = true; return; }
     remote = normalize(remote);
-    if(JSON.stringify(remote) === JSON.stringify(state)){ synced = true; return; }
-    if(synced && role === "katia"){
-      var d = diffApprovals(state, remote);
-      state = remote; Store.save(state); render();
+    var rr = remote.rev||0, myBy = state.by||"", rBy = remote.by||"";
+    if(rr < lastRev){ Sync.push(state); return; }               // we're newer → rebroadcast ours, ignore theirs
+    if(rr === lastRev && rBy === myBy){ synced = true; return; } // our own echo
+    if(rr === lastRev && rBy < myBy){ Sync.push(state); return; } // same version, we win the tiebreak
+    var showPop = synced && role === "katia";
+    var d = showPop ? diffApprovals(state, remote) : null;
+    state = remote; lastRev = rr; Store.save(state); synced = true; render();
+    if(d){
       if(d.earning)      moneyPopup("+$"+d.earning.amount, d.earning.label+" — approved! 🎉");
       else if(d.secured) moneyPopup("$"+state.base+" locked in!", "You finished every chore this week! 🎉");
       else if(d.chore)   moneyPopup("Approved! ✓", d.chore);
-      return;
     }
-    state = remote; Store.save(state); synced = true; render();
   }
   function diffApprovals(o, n){
     var res = {};
@@ -679,7 +684,8 @@
     var settings = role==="parent"
       ? '<div class="sectlabel">Parent settings</div><section class="card" style="padding:8px 6px">'+
         '<button class="btn wide ghost" data-act="settings" style="margin:6px 0">⚙️ Name, amount, PIN & sound</button>'+
-        '<button class="btn wide coral" data-act="resetall" style="margin:6px 0">↺ Reset everything</button></section>'
+        '<button class="btn wide coral" data-act="resetall" style="margin:6px 0">↺ Reset everything</button>'+
+        '<div style="text-align:center;color:var(--ink-soft);font-size:11px;font-weight:600;margin-top:6px">Coin Club '+APP_VERSION+(cloudOn?' · ☁️ synced':' · not synced yet')+'</div></section>'
       : "";
     return streak + '<div class="sectlabel">Badges</div>' + grid + settings;
   }
@@ -1013,7 +1019,15 @@
 })();
 </script>
 <script>
-if('serviceWorker' in navigator){ addEventListener('load',function(){ navigator.serviceWorker.register('sw.js').catch(function(){}); }); }
+if('serviceWorker' in navigator){
+  addEventListener('load',function(){
+    navigator.serviceWorker.register('sw.js').then(function(reg){ try{ reg.update(); }catch(e){} }).catch(function(){});
+    if(navigator.serviceWorker.controller){
+      var reloaded=false;
+      navigator.serviceWorker.addEventListener('controllerchange', function(){ if(reloaded) return; reloaded=true; location.reload(); });
+    }
+  });
+}
 </script>
 </body>
 </html>
