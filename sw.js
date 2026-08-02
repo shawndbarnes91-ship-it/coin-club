@@ -1,5 +1,5 @@
 /* Katia's Coin Club — offline shell */
-var C = "coinclub-v4";
+var C = "coinclub-v5";
 var ASSETS = ["./", "./index.html", "./manifest.webmanifest",
   "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./favicon-32.png"];
 

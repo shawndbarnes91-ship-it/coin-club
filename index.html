@@ -15,8 +15,6 @@
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script src="firebase-config.js"></script>
 <style>
   :root{
@@ -243,24 +241,39 @@
     save:function(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
   };
 
-  /* ---------- live sync (Firebase Realtime Database) ---------- */
+  /* ---------- live sync (ntfy.sh — no account needed) ---------- */
   var cloudOn = false;
   var Sync = {
-    ref:null, t:null,
+    topic:null, es:null, t:null, cb:null,
     init:function(onRemote){
-      if(!window.FIREBASE_CONFIG || !window.firebase){ return; }
-      try{
-        firebase.initializeApp(window.FIREBASE_CONFIG);
-        this.ref = firebase.database().ref("coinclub/state");
-        this.ref.on("value", function(snap){ onRemote(snap.val()); });
-        firebase.database().ref(".info/connected").on("value", function(s){ cloudOn = !!s.val(); render(); });
-      }catch(e){ /* stays local-only */ }
+      if(!window.SYNC_TOPIC){ return; }
+      this.topic = window.SYNC_TOPIC; this.cb = onRemote; var self=this;
+      fetch("https://ntfy.sh/"+this.topic+"/json?poll=1&since=12h", {cache:"no-store"})
+        .then(function(r){ return r.ok ? r.text() : ""; })
+        .then(function(txt){
+          var latest=null;
+          (txt||"").split("\n").forEach(function(line){ line=line.trim(); if(!line) return;
+            try{ var m=JSON.parse(line); if(m.event==="message" && m.message && m.message.charAt(0)==="{") latest=m.message; }catch(e){} });
+          if(latest){ try{ self.cb(JSON.parse(latest)); }catch(e){} }
+          else { self.publish(state); }
+          cloudOn=true; render(); self.listen();
+        })
+        .catch(function(){ cloudOn=true; render(); self.listen(); });
     },
-    push:function(s){
-      if(!this.ref) return;
-      var self=this; clearTimeout(this.t);
-      this.t=setTimeout(function(){ try{ self.ref.set(s); }catch(e){} }, 250);
-    }
+    listen:function(){
+      var self=this;
+      try{
+        this.es = new EventSource("https://ntfy.sh/"+this.topic+"/sse");
+        this.es.onmessage = function(ev){
+          try{ var m=JSON.parse(ev.data);
+            if(m.event==="message" && m.message && m.message.charAt(0)==="{"){ cloudOn=true; self.cb(JSON.parse(m.message)); }
+          }catch(e){}
+        };
+        this.es.onopen = function(){ if(!cloudOn){ cloudOn=true; render(); } };
+      }catch(e){}
+    },
+    publish:function(s){ try{ fetch("https://ntfy.sh/"+this.topic, {method:"POST", body:JSON.stringify(s)}).catch(function(){}); }catch(e){} },
+    push:function(s){ if(!this.topic) return; var self=this; clearTimeout(this.t); this.t=setTimeout(function(){ self.publish(s); }, 400); }
   };
 
   /* ---------- notifications to parents (ntfy.sh) ---------- */
@@ -420,7 +433,13 @@
     if(state.weekStart !== cur){ state.weekStart = cur; state.marks = {}; save(); }
   })();
 
-  function save(){ Store.save(state); Sync.push(state); }
+  function save(){ pruneState(); Store.save(state); Sync.push(state); }
+  function pruneState(){
+    if(state.earnings && state.earnings.length) state.earnings=state.earnings.filter(function(e){ return e.week===state.weekStart; });
+    if(state.history && state.history.length>10) state.history=state.history.slice(0,10);
+    var guard=0;
+    while(state.history.length>3 && JSON.stringify(state).length>3800 && guard<60){ state.history.pop(); guard++; }
+  }
 
   function marksOf(s,c){ var m=s.marks&&s.marks[c.id]; return (m&&m.length===c.slots)?m:new Array(c.slots).fill(0); }
   function approvedOf(s,c){ var n=0,m=marksOf(s,c); for(var i=0;i<m.length;i++) if(m[i]===2) n++; return n; }
