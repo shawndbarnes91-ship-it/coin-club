@@ -71,20 +71,32 @@
   .rolechip{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);padding:7px 12px;border-radius:100px;font-weight:700;font-size:13px;box-shadow:var(--shadow)}
   .rolechip .dot{width:8px;height:8px;border-radius:50%;background:var(--grape)}
   .rolechip.parent .dot{background:var(--mint)}
+  .rolechip .bell{background:var(--coral);color:#fff;border-radius:100px;font-size:11px;font-weight:800;padding:1px 6px;margin-left:2px}
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
   .weekpill{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);color:var(--ink-soft);font-weight:700;font-size:12.5px;padding:7px 13px;border-radius:100px;margin:4px 0 14px}
   .weekpill b{color:var(--ink)}
   .weekpill .left{color:var(--coral)}
 
+  .frozen{padding:14px 16px;margin:4px 0 14px;background:linear-gradient(160deg,var(--gold-soft),var(--card));border-color:var(--gold);font-weight:700;font-size:13px;line-height:1.45}
+  .frozen b{font-family:var(--font-round)}
+
   .jarcard{padding:20px 20px 22px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
   .jarcard.secured{background:linear-gradient(180deg,var(--mint-soft),var(--card))}
   .jarwrap{display:flex;align-items:center;justify-content:center;gap:18px}
+  .jarcol{display:flex;flex-direction:column;align-items:center;gap:5px}
   .jar{width:112px;height:132px;flex:none}
+  .sidestack{display:flex;align-items:center;gap:3px;font-size:16px;line-height:1;height:20px}
+  .sidestack.has{animation:coinbob 2.6s ease-in-out infinite}
+  .sidestack.none{opacity:0}
+  .sidestack b{font-family:var(--font-round);color:var(--gold);font-size:14.5px;margin-left:3px}
+  @keyframes coinbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+  .sidelab{font-size:10px;font-weight:800;color:var(--ink-soft);letter-spacing:.6px;height:13px}
+  .sidelab.none{opacity:0}
   .jarinfo{text-align:left}
-  .jaramt{font-family:var(--font-round);font-weight:800;font-size:40px;line-height:1;letter-spacing:-1px}
-  .jaramt small{font-size:20px;color:var(--ink-soft);font-weight:700}
-  .jarstatus{margin-top:8px;font-weight:700;font-size:14px;color:var(--ink-soft);max-width:150px}
+  .jaramt{font-family:var(--font-round);font-weight:800;font-size:36px;line-height:1;letter-spacing:-1px}
+  .jaramt small{font-size:19px;color:var(--ink-soft);font-weight:700}
+  .jarstatus{margin-top:8px;font-weight:700;font-size:13.5px;color:var(--ink-soft);max-width:150px;line-height:1.4}
   .jarstatus.go{color:var(--mint)}
   .jarstatus .hi{color:var(--coral)}
   .secbadge{display:inline-flex;align-items:center;gap:6px;background:var(--mint);color:#fff;font-weight:800;font-size:13px;padding:6px 12px;border-radius:100px;margin-top:10px}
@@ -95,13 +107,15 @@
   .chore{display:flex;flex-direction:column;gap:12px;padding:15px 16px;margin-bottom:11px}
   .chore.done{background:linear-gradient(180deg,var(--mint-soft),var(--card))}
   .chore .top{display:flex;align-items:center;gap:13px}
-  .cico{width:46px;height:46px;flex:none;border-radius:14px;background:var(--card-2);display:grid;place-items:center;font-size:24px;border:1px solid var(--line)}
+  .cico{width:46px;height:46px;flex:none;border-radius:14px;background:var(--card-2);display:grid;place-items:center;font-size:24px;border:1px solid var(--line);position:relative}
   .chore.done .cico{background:var(--mint-soft);border-color:transparent}
+  .cico .camtag{position:absolute;right:-4px;bottom:-4px;font-size:12px;background:var(--card);border-radius:50%;width:19px;height:19px;display:grid;place-items:center;border:1px solid var(--line)}
   .cmeta{flex:1;min-width:0}
   .cmeta .name{font-family:var(--font-round);font-weight:800;font-size:15.5px}
   .cmeta .sub{color:var(--ink-soft);font-size:12.5px;font-weight:600;margin-top:2px}
   .cmeta .sub b{color:var(--mint)}
   .cmeta .sub .pend{color:var(--gold)}
+  .cmeta .sub .val{color:var(--gold);font-weight:800}
   .cx{color:var(--ink-soft);font-size:20px;padding:2px 6px;opacity:.5}
   .checkmini{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex:none;border:2px solid var(--line);color:transparent;font-weight:900;font-size:14px}
   .chore.done .checkmini{background:var(--mint);border-color:var(--mint);color:#fff}
@@ -116,6 +130,7 @@
   .slot.today{box-shadow:0 0 0 3px var(--grape-soft)}
   .slot.star{width:44px;height:44px;font-size:20px}
   .slot.pop{animation:slotpop .32s ease}
+  .slot.lock{opacity:.4}
   @keyframes slotpop{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
   .hint{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:2px}
 
@@ -146,14 +161,16 @@
   .brkline{display:flex;justify-content:space-between;padding:12px 4px;border-bottom:1px solid var(--line);font-weight:700}
   .brkline:last-child{border:0}
   .brkline .v{font-family:var(--font-round);font-weight:800}
+  .brkline .s{display:block;color:var(--ink-soft);font-size:11.5px;font-weight:600;margin-top:2px}
   .stat2{display:flex;gap:12px;margin:14px 0}
   .stat2 .card{flex:1;padding:16px;text-align:center}
-  .stat2 .k{font-family:var(--font-round);font-weight:800;font-size:26px}
+  .stat2 .k{font-family:var(--font-round);font-weight:800;font-size:24px}
   .stat2 .l{color:var(--ink-soft);font-size:12px;font-weight:700;margin-top:2px}
   .hist{padding:4px 15px}
-  .histrow{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-weight:700;font-size:13.5px}
+  .histrow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--line);font-weight:700;font-size:13.5px;gap:10px}
   .histrow:last-child{border:0}
-  .histrow .d{color:var(--ink-soft);font-weight:600;font-size:12px}
+  .histrow .d{color:var(--ink-soft);font-weight:600;font-size:12px;margin-top:3px}
+  .histrow .amt{font-family:var(--font-round);font-weight:800;font-size:17px;white-space:nowrap}
   .tag{font-size:11px;font-weight:800;padding:3px 9px;border-radius:100px}
   .tag.perfect{background:var(--mint-soft);color:var(--mint)}
   .tag.part{background:var(--gold-soft);color:var(--gold)}
@@ -162,18 +179,18 @@
   .streakcard .big{font-family:var(--font-round);font-weight:800;font-size:52px;line-height:1}
   .streakcard .l{font-weight:700;opacity:.95}
   .badges{display:grid;grid-template-columns:1fr 1fr;gap:11px}
-  .badge{padding:16px;text-align:center}
-  .badge .em{font-size:34px;filter:grayscale(1);opacity:.35}
+  .badge{padding:16px 12px;text-align:center}
+  .badge .em{font-size:32px;filter:grayscale(1);opacity:.32}
   .badge.on .em{filter:none;opacity:1}
   .badge .bn{font-family:var(--font-round);font-weight:800;font-size:13.5px;margin-top:6px}
-  .badge .bd{color:var(--ink-soft);font-size:11.5px;font-weight:600;margin-top:2px}
+  .badge .bd{color:var(--ink-soft);font-size:11.5px;font-weight:600;margin-top:2px;line-height:1.35}
   .badge.on{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-soft),var(--shadow)}
 
   .empty{text-align:center;color:var(--ink-soft);font-weight:600;font-size:13.5px;padding:26px 10px}
 
-  nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card);border-top:1px solid var(--line);padding:8px 8px calc(8px + env(safe-area-inset-bottom));display:flex;max-width:480px;margin:0 auto}
-  nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--ink-soft);font-weight:700;font-size:11px;border-radius:14px}
-  nav button .ni{font-size:21px;line-height:1}
+  nav{position:fixed;bottom:0;left:0;right:0;z-index:30;background:var(--card);border-top:1px solid var(--line);padding:8px 4px calc(8px + env(safe-area-inset-bottom));display:flex;max-width:480px;margin:0 auto}
+  nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 0;color:var(--ink-soft);font-weight:700;font-size:10.5px;border-radius:14px}
+  nav button .ni{font-size:20px;line-height:1}
   nav button.active{color:var(--grape)}
   nav button.active .ni{transform:translateY(-1px)}
 
@@ -181,11 +198,17 @@
   .scrim.on{display:flex}
   .sheet{background:var(--card);width:100%;max-width:480px;border-radius:26px 26px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));box-shadow:0 -10px 40px rgba(0,0,0,.25);max-height:88vh;overflow-y:auto}
   .sheet h3{font-family:var(--font-round);font-weight:800;margin:2px 0 14px;font-size:19px}
+  .csub{color:var(--ink-soft);font-weight:600;font-size:13.5px;margin:-8px 0 14px;line-height:1.5}
+  .csub b{color:var(--ink)}
   .field{margin-bottom:12px}
   .field label{display:block;font-weight:700;font-size:12.5px;color:var(--ink-soft);margin-bottom:5px}
   .field input,.field select{width:100%;padding:13px 14px;border-radius:13px;border:1.5px solid var(--line);background:var(--card-2);color:var(--ink);font-size:16px;font-family:inherit;font-weight:600}
   .field input:focus,.field select:focus{outline:none;border-color:var(--grape)}
   .sheetbtns{display:flex;gap:10px;margin-top:8px}
+  .sheetbtns.stack{flex-direction:column}
+
+  .proof{width:100%;max-height:38vh;object-fit:contain;border-radius:16px;background:var(--card-2);border:1px solid var(--line);margin-bottom:14px;display:block}
+  .shooting{text-align:center;padding:26px 10px;color:var(--ink-soft);font-weight:700;font-size:14px}
 
   /* icon picker */
   .iconhead{display:flex;gap:10px;align-items:center;margin-bottom:8px}
@@ -197,14 +220,34 @@
   .iconopt.sel{background:var(--grape-soft);border-color:var(--grape)}
   .iconnone{grid-column:1/-1;text-align:center;color:var(--ink-soft);font-weight:600;font-size:13px;padding:16px}
 
-  /* approvals */
+  /* toggle */
+  .toggrow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 14px;background:var(--card-2);border:1.5px solid var(--line);border-radius:13px;margin-bottom:12px}
+  .toggrow .tl{font-weight:700;font-size:13.5px}
+  .toggrow .td{color:var(--ink-soft);font-weight:600;font-size:11.5px;margin-top:2px;line-height:1.35}
+  .tog{width:52px;height:30px;border-radius:100px;background:var(--line);position:relative;flex:none;transition:background .16s}
+  .tog:after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.25);transition:transform .16s}
+  .tog.on{background:var(--mint)}
+  .tog.on:after{transform:translateX(22px)}
+
+  /* approvals + dashboard */
   .aprow{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid var(--line)}
   .aprow:last-child{border:0}
-  .apico{width:38px;height:38px;flex:none;border-radius:11px;background:var(--card-2);display:grid;place-items:center;font-size:20px;border:1px solid var(--line)}
+  .apico{width:38px;height:38px;flex:none;border-radius:11px;background:var(--card-2);display:grid;place-items:center;font-size:20px;border:1px solid var(--line);overflow:hidden}
+  .apico img{width:100%;height:100%;object-fit:cover}
   .apmeta{flex:1;min-width:0}
   .apmeta .n{font-weight:800;font-size:14px}
   .apmeta .w{color:var(--ink-soft);font-size:12px;font-weight:600}
   .apok{background:var(--mint);color:#fff;border-radius:100px;font-weight:800;font-size:13px;padding:8px 14px;white-space:nowrap}
+  .dashsec{font-family:var(--font-round);font-weight:800;font-size:13px;color:var(--ink-soft);margin:18px 2px 8px;letter-spacing:.3px;text-transform:uppercase}
+  .dashsec:first-of-type{margin-top:6px}
+  .dashbox{background:var(--card-2);border:1px solid var(--line);border-radius:16px;padding:6px 14px}
+  .dashbox.pad{padding:14px}
+  .dashnum{display:flex;gap:10px}
+  .dashnum div{flex:1;background:var(--card-2);border:1px solid var(--line);border-radius:16px;padding:13px 8px;text-align:center}
+  .dashnum .k{font-family:var(--font-round);font-weight:800;font-size:20px}
+  .dashnum .l{color:var(--ink-soft);font-size:10.5px;font-weight:700;margin-top:2px}
+  .allowrow{display:flex;gap:10px;align-items:flex-end}
+  .allowrow .field{flex:1;margin-bottom:0}
 
   #cfx{position:fixed;inset:0;pointer-events:none;z-index:50}
 
@@ -235,12 +278,35 @@
   "use strict";
 
   /* ---------- local cache ---------- */
-  var KEY = "katia-coin-club-v3";
-  var APP_VERSION = "v6";
+  var KEY  = "katia-coin-club-v3";
+  var PKEY = "katia-coin-club-photos";   /* photos stay LOCAL — never synced (4KB ceiling) */
+  var APP_VERSION = "v7";
   var deviceId = (function(){ try{ var d=localStorage.getItem("coinclub-device"); if(!d){ d="d"+Math.random().toString(36).slice(2,9); localStorage.setItem("coinclub-device",d);} return d; }catch(e){ return "d"+Math.random().toString(36).slice(2,9); } })();
   var Store = {
     load:function(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } },
     save:function(s){ try{ localStorage.setItem(KEY, JSON.stringify(s)); }catch(e){} }
+  };
+
+  /* ---------- proof photos (local only, small rolling cache) ---------- */
+  var PhotoStore = {
+    all:function(){ try{ return JSON.parse(localStorage.getItem(PKEY))||{}; }catch(e){ return {}; } },
+    write:function(m){ try{ localStorage.setItem(PKEY, JSON.stringify(m)); return true; }catch(e){ return false; } },
+    put:function(k,url){
+      var m=this.all(); m[k]={u:url,t:Date.now()};
+      var keys=Object.keys(m);
+      while(keys.length>10){
+        var oldest=keys.reduce(function(a,b){ return m[a].t<m[b].t?a:b; });
+        delete m[oldest]; keys=Object.keys(m);
+      }
+      while(!this.write(m)){
+        var ks=Object.keys(m); if(!ks.length) break;
+        var o=ks.reduce(function(a,b){ return m[a].t<m[b].t?a:b; });
+        delete m[o];
+      }
+    },
+    get:function(k){ var m=this.all(); return (m[k]&&m[k].u)||null; },
+    del:function(k){ var m=this.all(); if(m[k]){ delete m[k]; this.write(m); } },
+    clear:function(){ this.write({}); }
   };
 
   /* ---------- live sync (ntfy.sh — no account needed) ---------- */
@@ -279,13 +345,28 @@
   };
 
   /* ---------- notifications to parents (ntfy.sh) ---------- */
+  /* ntfy headers must be latin-1 — strip emoji/accents or fetch() throws. */
+  function ascii(s){ return String(s==null?"":s).replace(/[^\x20-\x7E]/g,"").replace(/\s+/g," ").trim(); }
   function notify(title, body){
     if(!window.NTFY_TOPIC) return;
     try{
       fetch("https://ntfy.sh/"+window.NTFY_TOPIC, {
-        method:"POST", headers:{ "Title":title, "Tags":"moneybag", "Click":location.href }, body:body
-      });
+        method:"POST", headers:{ "Title":ascii(title)||"Coin Club", "Tags":"moneybag", "Click":location.href }, body:body
+      }).catch(function(){});
     }catch(e){}
+  }
+  /* Photo proof rides along as an ntfy attachment so mom & dad see it in the push itself. */
+  function notifyPhoto(title, body, blob){
+    if(!window.NTFY_TOPIC) return;
+    if(!blob){ notify(title, body); return; }
+    try{
+      fetch("https://ntfy.sh/"+window.NTFY_TOPIC, {
+        method:"PUT",
+        headers:{ "Filename":"proof.jpg", "Title":ascii(title)||"Coin Club", "Message":ascii(body)||"Tap to approve",
+                  "Tags":"camera", "Click":location.href },
+        body: blob
+      }).catch(function(){ notify(title, body); });
+    }catch(e){ notify(title, body); }
   }
 
   /* ---------- helpers ---------- */
@@ -294,10 +375,12 @@
   function startOfWeek(d){ var x=new Date(d); x.setHours(0,0,0,0); var diff=(x.getDay()-6+7)%7; x.setDate(x.getDate()-diff); return x; }
   function fmtWeek(iso){ var s=new Date(iso); var e=new Date(s); e.setDate(e.getDate()+6);
     var o={month:"short",day:"numeric"}; return s.toLocaleDateString(undefined,o)+" – "+e.toLocaleDateString(undefined,o); }
-  function daysLeft(iso){ var e=new Date(iso); e.setDate(e.getDate()+6); e.setHours(23,59,59,0);
-    return Math.max(0, Math.ceil((e-new Date())/86400000)); }
+  function weekEnd(iso){ var e=new Date(iso); e.setDate(e.getDate()+6); e.setHours(23,59,59,999); return e; }
+  function daysLeft(iso){ return Math.max(0, Math.ceil((weekEnd(iso)-new Date())/86400000)); }
   function todayIdx(iso){ var i=Math.floor((new Date()-new Date(iso))/86400000); return i<0?-1:(i>6?-1:i); }
   function uid(){ return "id"+Math.random().toString(36).slice(2,9); }
+  function round2(n){ return Math.round(n*100)/100; }
+  function money(n){ n=round2(n||0); return "$"+(n%1===0 ? String(n) : n.toFixed(2)); }
 
   /* ---------- icon set (searchable) ---------- */
   var EMOJI = [
@@ -388,14 +471,14 @@
 
   function defaultState(){
     return {
-      v:3, child:"Katia", base:20, pin:"11514", sound:true,
+      v:4, child:"Katia", base:20, pin:"11514", sound:true,
       weekStart:startOfWeek(new Date()).toISOString(),
       required:[
-        {id:"bed",     name:"Make your bed",          icon:"🛏️", layout:"week",  slots:7, need:6},
-        {id:"dogs",    name:"Dog duty · feed + water", icon:"🐶", layout:"week",  slots:7, need:6},
-        {id:"dishes",  name:"Dinner cleanup",          icon:"🍽️", layout:"week",  slots:7, need:6},
-        {id:"room",    name:"Room reset",              icon:"🧹", layout:"stars", slots:2, need:2},
-        {id:"laundry", name:"Put away laundry",        icon:"🧺", layout:"stars", slots:1, need:1}
+        {id:"bed",     name:"Make your bed",           icon:"🛏️", layout:"week",  slots:7, need:6, photo:true},
+        {id:"dogs",    name:"Dog duty · feed + water", icon:"🐶", layout:"week",  slots:7, need:6, photo:true},
+        {id:"dishes",  name:"Dinner cleanup",          icon:"🍽️", layout:"week",  slots:7, need:6, photo:true},
+        {id:"room",    name:"Room reset",              icon:"🧹", layout:"stars", slots:2, need:2, photo:true},
+        {id:"laundry", name:"Put away laundry",        icon:"🧺", layout:"stars", slots:1, need:1, photo:true}
       ],
       marks:{},
       jobs:[
@@ -407,7 +490,8 @@
         {id:uid(), name:"Take out all trash",    icon:"🚮", price:2, status:"open"}
       ],
       earnings:[], history:[],
-      lifetime:0, lifetimeExtras:0, perfectWeeks:0, streak:0
+      lifetime:0, lifetimeExtras:0, perfectWeeks:0, streak:0,
+      ach:{}, maxWeekExtras:0, jobsDone:0
     };
   }
 
@@ -418,11 +502,15 @@
     s.earnings = s.earnings || [];
     s.history  = s.history || [];
     s.marks    = s.marks || {};
+    s.ach      = s.ach || {};
     if(typeof s.base!=="number") s.base = 20;
+    if(typeof s.maxWeekExtras!=="number") s.maxWeekExtras = 0;
+    if(typeof s.jobsDone!=="number") s.jobsDone = 0;
     if(!s.child) s.child = "Katia";
     if(!s.pin)   s.pin = "11514";
     if(s.sound===undefined) s.sound = true;
     if(!s.weekStart) s.weekStart = startOfWeek(new Date()).toISOString();
+    s.required.forEach(function(c){ if(c.photo===undefined) c.photo = true; });
     return s;
   }
 
@@ -431,10 +519,9 @@
   var role = "katia";
   var tab  = "week";
 
-  (function rollover(){
-    var cur = startOfWeek(new Date()).toISOString();
-    if(state.weekStart !== cur){ state.weekStart = cur; state.marks = {}; save(); }
-  })();
+  /* NOTE: the week no longer rolls over on its own. It freezes when it ends and
+     waits for a parent to pay it out or start a new one. Nothing is ever wiped
+     automatically — that used to silently delete unpaid extra-job money. */
 
   function save(){ pruneState(); lastRev = Math.max(lastRev, state.rev||0) + 1; state.rev = lastRev; state.by = deviceId; Store.save(state); Sync.push(state); }
   function pruneState(){
@@ -444,6 +531,20 @@
     while(state.history.length>3 && JSON.stringify(state).length>3800 && guard<60){ state.history.pop(); guard++; }
   }
 
+  /* ---------- week state ---------- */
+  function weekOver(){ return new Date() > weekEnd(state.weekStart); }
+  function frozen(){ return weekOver(); }
+  function nextWeekStart(){
+    var n=new Date(state.weekStart); n.setDate(n.getDate()+7); n.setHours(0,0,0,0);
+    var cur=startOfWeek(new Date());
+    return (cur>n ? cur : n).toISOString();
+  }
+
+  /* ---------- pro-rated money ----------
+     Each chore's slice of the week = base × (need ÷ total need).
+     Each star inside a chore = that slice ÷ need.
+     A 6-of-7 chore maxes out at six stars, so the 7th day stays a free spare —
+     the cushion survives pro-rating. Add or remove chores and it all recomputes. */
   function marksOf(s,c){ var m=s.marks&&s.marks[c.id]; return (m&&m.length===c.slots)?m:new Array(c.slots).fill(0); }
   function approvedOf(s,c){ var n=0,m=marksOf(s,c); for(var i=0;i<m.length;i++) if(m[i]===2) n++; return n; }
   function securedOf(s,c){ return approvedOf(s,c) >= c.need; }
@@ -453,10 +554,41 @@
   function approvedCount(c){ return approvedOf(state,c); }
   function secured(c){ return securedOf(state,c); }
   function allSecured(){ return allSecuredOf(state); }
+
+  function totalNeed(){ return state.required.reduce(function(a,c){ return a+(c.need||0); },0); }
+  function choreValue(c){ var t=totalNeed(); return t ? state.base*((c.need||0)/t) : 0; }
+  function choreEarned(c){ var t=totalNeed(); return t ? state.base*(Math.min(approvedCount(c), c.need)/t) : 0; }
+  function baseEarned(){ return state.required.reduce(function(a,c){ return a+choreEarned(c); },0); }
+  function basePct(){ return state.base>0 ? Math.max(0,Math.min(1, baseEarned()/state.base)) : 0; }
+
   function weekExtras(){ return (state.earnings||[]).filter(function(e){return e.week===state.weekStart;})
       .reduce(function(a,e){return a+e.amount;},0); }
-  function projected(){ return (allSecured()?state.base:0) + weekExtras(); }
+  function projected(){ return round2(baseEarned() + weekExtras()); }
   function findJob(id){ return state.jobs.find(function(x){return x.id===id;}); }
+  function findChore(id){ return state.required.find(function(x){return x.id===id;}); }
+
+  /* ---------- badges ---------- */
+  var BADGES = [
+    {em:"🌟",n:"First Payday",  d:"Get paid once",              on:function(){ return state.history.length>=1; }},
+    {em:"🐣",n:"Early Bird",    d:"Mark a chore before 9am",    on:function(){ return !!state.ach.eb; }},
+    {em:"🧼",n:"Clean Sweep",   d:"A daily chore 7 for 7",      on:function(){ return !!state.ach.cs; }},
+    {em:"🙋",n:"Go-Getter",     d:"Claim your first job",       on:function(){ return !!state.ach.gg; }},
+    {em:"✅",n:"Job Done",      d:"Finish your first job",      on:function(){ return !!state.ach.fj; }},
+    {em:"💡",n:"Entrepreneur",  d:"An idea of yours gets posted",on:function(){ return !!state.ach.en; }},
+    {em:"🚀",n:"Big Week",      d:"$15 from jobs in one week",  on:function(){ return state.maxWeekExtras>=15; }},
+    {em:"🔥",n:"On Fire",       d:"3-week streak",              on:function(){ return state.streak>=3; }},
+    {em:"💎",n:"Flawless Four", d:"4 perfect weeks",            on:function(){ return state.perfectWeeks>=4; }},
+    {em:"💼",n:"Side Hustler",  d:"$25 from jobs",              on:function(){ return state.lifetimeExtras>=25; }},
+    {em:"🏦",n:"Big Saver",     d:"$100 all-time",              on:function(){ return state.lifetime>=100; }},
+    {em:"👑",n:"Coin Royalty",  d:"$250 all-time",              on:function(){ return state.lifetime>=250; }},
+    {em:"🏅",n:"Perfect Ten",   d:"10 perfect weeks",           on:function(){ return state.perfectWeeks>=10; }},
+    {em:"🦄",n:"Five Hundred",  d:"$500 all-time",              on:function(){ return state.lifetime>=500; }},
+    {em:"🐉",n:"Grand",         d:"$1,000 all-time",            on:function(){ return state.lifetime>=1000; }}
+  ];
+  function touchBadges(){
+    state.required.forEach(function(c){ if(c.layout==="week" && approvedCount(c)>=c.slots) state.ach.cs=1; });
+    var we=weekExtras(); if(we>state.maxWeekExtras) state.maxWeekExtras=round2(we);
+  }
 
   /* ---------- incoming remote updates ---------- */
   var synced = false;
@@ -466,13 +598,13 @@
     var rr = remote.rev||0, myBy = state.by||"", rBy = remote.by||"";
     if(rr < lastRev){ Sync.push(state); return; }               // we're newer → rebroadcast ours, ignore theirs
     if(rr === lastRev && rBy === myBy){ synced = true; return; } // our own echo
-    if(rr === lastRev && rBy < myBy){ Sync.push(state); return; } // same version, we win the tiebreak
+    if(rr === lastRev && rBy < myBy){ Sync.push(state); return; }// same version, we win the tiebreak
     var showPop = synced && role === "katia";
     var d = showPop ? diffApprovals(state, remote) : null;
     state = remote; lastRev = rr; Store.save(state); synced = true; render();
     if(d){
-      if(d.earning)      moneyPopup("+$"+d.earning.amount, d.earning.label+" — approved! 🎉");
-      else if(d.secured) moneyPopup("$"+state.base+" locked in!", "You finished every chore this week! 🎉");
+      if(d.earning)      moneyPopup("+"+money(d.earning.amount), d.earning.label+" — approved! 🎉");
+      else if(d.secured) moneyPopup(money(state.base)+" — full jar!", "You finished every chore this week! 🎉");
       else if(d.chore)   moneyPopup("Approved! ✓", d.chore);
     }
   }
@@ -496,16 +628,19 @@
   function esc(s){ return String(s).replace(/[&<>"]/g,function(m){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m];}); }
 
   function render(){
-    var sub = "$"+state.base+" a week + extra jobs" + (cloudOn ? " · ☁️ synced" : "");
+    var sub = money(state.base)+" a week + extra jobs" + (cloudOn ? " · ☁️ synced" : "");
+    var pend = pendingApprovals().length;
+    var bell = (role==="parent" && pend) ? '<span class="bell">'+pend+'</span>' : "";
     var head =
       '<header><div class="brand"><div class="coin">$</div>'+
       '<div><h1>'+esc(state.child)+"'s Coin Club</h1><small>"+sub+'</small></div></div>'+
       '<button class="rolechip '+(role==="parent"?"parent":"")+'" data-act="role"><span class="dot"></span>'+
-      (role==="parent"?"Parent ✕":"🔒 Parent")+'</button></header>';
+      (role==="parent"?"Parent":"🔒 Parent")+bell+'</button></header>';
 
     var body = tab==="week" ? viewWeek()
              : tab==="jobs" ? viewJobs()
              : tab==="wallet" ? viewWallet()
+             : tab==="history" ? viewHistory()
              : viewWins();
 
     app.innerHTML = head + body;
@@ -514,66 +649,84 @@
   }
 
   function viewWeek(){
-    var sec = state.required.filter(secured).length, tot = state.required.length;
-    var pct = tot? sec/tot : 0;
+    var earned = baseEarned(), pct = basePct(), ex = weekExtras();
     var left = daysLeft(state.weekStart);
     var done = allSecured();
-    var toGo = tot - sec;
+    var isFrozen = frozen();
 
     var status = done
-      ? '<div class="jarstatus go">$'+state.base+' is locked in for this week! 🎉</div>'
-      : '<div class="jarstatus"><span class="hi">'+toGo+'</span> more to lock your $'+state.base+'</div>';
+      ? '<div class="jarstatus go">Full jar! '+money(state.base)+' earned 🎉</div>'
+      : '<div class="jarstatus">'+money(round2(state.base-earned))+' still on the table</div>';
+
+    var coins="", lab="";
+    if(ex>0){
+      var n=Math.max(1,Math.min(4,Math.ceil(ex/5)));
+      coins=new Array(n+1).join("🪙")+'<b>+'+money(ex)+'</b>';
+      lab="SIDE HUSTLE";
+    }
+    var stack='<div class="sidestack '+(ex>0?"has":"none")+'">'+(coins||"🪙")+'</div>';
+    var slab ='<div class="sidelab '+(ex>0?"":"none")+'">'+(lab||"·")+'</div>';
 
     var jar =
       '<section class="card jarcard '+(done?"secured":"")+'">'+
-        '<div class="jarwrap">'+jarSVG(pct)+
-          '<div class="jarinfo"><div class="jaramt">$'+(done?state.base:0)+'<small>/'+state.base+'</small></div>'+
-          status+ (done?'<div class="secbadge">✓ Week secured</div>':"")+'</div>'+
+        '<div class="jarwrap">'+
+          '<div class="jarcol">'+stack+jarSVG(pct)+slab+'</div>'+
+          '<div class="jarinfo"><div class="jaramt num">'+money(earned)+'<small>/'+money(state.base)+'</small></div>'+
+          status+ (done?'<div class="secbadge">✓ Week complete</div>':"")+'</div>'+
         '</div></section>';
 
-    var pill = '<div class="weekpill">📅 <b>This week</b> · '+fmtWeek(state.weekStart)+
-      ' · <span class="left">'+(left===0?"last day!":left+" days left")+'</span></div>';
+    var pill = isFrozen
+      ? '<section class="card frozen">🔒 <b>Payday ready.</b> This week is finished ('+fmtWeek(state.weekStart)+
+        ') and locked so nothing gets lost. A parent pays it out to start the next one.</section>'
+      : '<div class="weekpill">📅 <b>This week</b> · '+fmtWeek(state.weekStart)+
+        ' · <span class="left">'+(left===0?"last day!":left+" days left")+'</span></div>';
 
     var list = state.required.map(choreCard).join("") ||
       '<div class="card empty">No required chores yet. Switch to Parent to add some.</div>';
 
     var addBtn = role==="parent" ? '<button class="add" data-act="addchore">+ Add</button>' : "";
 
-    return pill + jar +
-      '<div class="sectlabel">Required chores'+addBtn+'</div>' + list +
-      (role!=="parent"
-        ? '<div class="hint" style="text-align:center;margin-top:6px">Tap a day to mark it done — a parent approves it ✓</div>'
-        : '<div class="hint" style="text-align:center;margin-top:6px">Drag the ⠿ handle to reorder · tap a day-dot to approve</div>');
+    var hint = role==="parent"
+      ? '<div class="hint" style="text-align:center;margin-top:6px">Drag the ⠿ handle to reorder · tap a day-dot to approve or undo</div>'
+      : (isFrozen
+          ? '<div class="hint" style="text-align:center;margin-top:6px">The week is locked — ask a parent to pay it out.</div>'
+          : '<div class="hint" style="text-align:center;margin-top:6px">Tap a day, snap a photo of your work, and a parent approves it ✓</div>');
+
+    return pill + jar + '<div class="sectlabel">Required chores'+addBtn+'</div>' + list + hint;
   }
 
   function choreCard(c){
     var ap=approvedCount(c), pend=marksFor(c).filter(function(x){return x===1;}).length, ok=secured(c);
     var ti = c.layout==="week" ? todayIdx(state.weekStart) : -1;
+    var lock = frozen() && role!=="parent";
     var slots = marksFor(c).map(function(v,i){
       var cls = v===2?"approved":v===1?"pending":"";
       var mark = v===2?"✓":v===1?"•":"";
       if(c.layout==="week"){
-        return '<button class="slot '+cls+(i===ti?" today":"")+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+
+        return '<button class="slot '+cls+(i===ti?" today":"")+(lock?" lock":"")+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+
           '<span class="mk">'+mark+'</span>'+DAYS[i]+'</button>';
       }
-      return '<button class="slot star '+cls+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+(v===2?"★":"☆")+'</button>';
+      return '<button class="slot star '+cls+(lock?" lock":"")+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+(v===2?"★":"☆")+'</button>';
     }).join("");
 
-    var goal = c.layout==="week" ? ("Any "+c.need+" of 7 days") : (c.need+"× this week");
+    var goal = c.layout==="week" ? ("Any "+c.need+" of "+c.slots+" days") : (c.need+"× this week");
+    var worth = '<span class="val">'+money(choreValue(c))+'</span>';
     var sub = ok
-      ? '<b>✓ Secured — nice!</b>'
-      : goal + ' · '+ap+'/'+c.need+' done'+(pend?' <span class="pend">· '+pend+" waiting</span>":"");
+      ? '<b>✓ Maxed out — '+money(choreEarned(c))+'</b>'
+      : goal+' · '+ap+'/'+c.need+' · '+money(choreEarned(c))+' of '+worth+(pend?' <span class="pend">· '+pend+" waiting</span>":"");
 
     var right;
     if(role==="parent"){
       right = '<div class="cright"><button class="grip" data-grip="'+c.id+'" aria-label="Drag to reorder">⠿</button>'+
+              '<button class="cx" data-act="editchore" data-c="'+c.id+'" aria-label="Edit">✎</button>'+
               '<button class="cx" data-act="delchore" data-c="'+c.id+'" aria-label="Delete">✕</button></div>';
     } else {
       right = ok ? '<div class="checkmini">✓</div>' : "";
     }
+    var cam = c.photo!==false ? '<span class="camtag">📷</span>' : "";
 
     return '<section class="card chore '+(ok?"done":"")+'" data-cid="'+c.id+'"><div class="top">'+
-      '<div class="cico">'+c.icon+'</div>'+
+      '<div class="cico">'+c.icon+cam+'</div>'+
       '<div class="cmeta"><div class="name">'+esc(c.name)+'</div><div class="sub">'+sub+'</div></div>'+
       right +
       '</div><div class="slots '+(c.layout==="stars"?"stars":"")+'">'+slots+'</div></section>';
@@ -608,11 +761,12 @@
     });
     var out="";
     if(mine.length){ out += '<div class="sectlabel">In progress</div>' + mine.map(jobCard).join(""); }
-    if(proposed.length){ out += '<div class="sectlabel">'+(role==="parent"?"Katia proposed":"Waiting for a parent")+'</div>' + proposed.map(jobCard).join(""); }
+    if(proposed.length){ out += '<div class="sectlabel">'+(role==="parent"?esc(state.child)+" proposed":"Waiting for a parent")+'</div>' + proposed.map(jobCard).join(""); }
     var addBtn = role==="parent" ? '<button class="add" data-act="addjob">+ Add job</button>'
                                  : '<button class="add" data-act="propose">+ Suggest one</button>';
     out += '<div class="sectlabel">Job board'+addBtn+'</div>';
     out += open.length ? open.map(jobCard).join("") : '<div class="card empty">No open jobs right now.</div>';
+    out += '<div class="hint" style="text-align:center;margin-top:10px">💼 Job money stacks on top of the jar — it never changes the '+money(state.base)+' chore goal.</div>';
     return out;
   }
 
@@ -624,123 +778,268 @@
     } else if(j.status==="claimed"){
       st = "Claimed by "+esc(state.child);
       act = role==="parent" ? '<button class="btn coral" data-act="unclaim" data-j="'+j.id+'">Return</button>'
-                            : '<button class="btn" data-act="markjob" data-j="'+j.id+'">Mark done</button>';
+                            : '<button class="btn" data-act="markjob" data-j="'+j.id+'">📷 Done</button>';
     } else if(j.status==="pending"){
       st = '<span style="color:var(--gold)">Done — waiting for approval</span>';
       act = role==="parent" ? '<div class="rowbtns"><button class="btn coral" data-act="rejectjob" data-j="'+j.id+'">✕</button>'+
-             '<button class="btn mint" data-act="payjob" data-j="'+j.id+'">Approve $'+j.price+'</button></div>' : "Nice work! 🙌";
+             '<button class="btn mint" data-act="payjob" data-j="'+j.id+'">Approve '+money(j.price)+'</button></div>' : "Nice work! 🙌";
     } else if(j.status==="proposed"){
-      st = "Suggested"+(j.price?" · $"+j.price:"");
+      st = "Suggested"+(j.price?" · "+money(j.price):"");
       act = role==="parent" ? '<div class="rowbtns"><button class="btn coral" data-act="deljob" data-j="'+j.id+'">✕</button>'+
              '<button class="btn mint" data-act="postjob" data-j="'+j.id+'">Post it</button></div>' : "Waiting…";
     }
     var actHtml = typeof act==="string" && act.indexOf("<")===-1 ? '<span class="jmeta" style="flex:0;color:var(--ink-soft);font-size:12px;font-weight:700">'+act+'</span>' : act;
     return '<section class="card job"><div class="jico">'+j.icon+'</div>'+
       '<div class="jmeta"><div class="name">'+esc(j.name)+'</div><div class="st">'+st+'</div></div>'+
-      '<div style="display:flex;align-items:center;gap:10px"><span class="price">$'+j.price+'</span>'+actHtml+del+'</div></section>';
+      '<div style="display:flex;align-items:center;gap:10px"><span class="price">'+money(j.price)+'</span>'+actHtml+del+'</div></section>';
   }
 
   function viewWallet(){
-    var ex=weekExtras(), base=allSecured()?state.base:0, tot=base+ex;
+    var ex=weekExtras(), base=baseEarned(), tot=round2(base+ex);
+    var t=totalNeed(), got=state.required.reduce(function(a,c){ return a+Math.min(approvedCount(c),c.need); },0);
     var big =
-      '<section class="card bigtotal"><div class="lab">This Friday, '+esc(state.child)+' gets</div>'+
-      '<div class="amt num">$'+tot+'</div>'+
-      '<div class="brk"><span>Base $'+base+'</span><span>+ Extras $'+ex+'</span></div></section>';
-    var brk = '<section class="card" style="padding:6px 16px"><div class="brkline"><span>Weekly chores '+
-      (allSecured()?'<span class="tag perfect">secured</span>':'<span class="tag part">not yet</span>')+'</span><span class="v num">$'+base+'</span></div>'+
-      '<div class="brkline"><span>Extra jobs done</span><span class="v num">$'+ex+'</span></div>'+
-      '<div class="brkline"><span><b>Payday total</b></span><span class="v num">$'+tot+'</span></div></section>';
+      '<section class="card bigtotal"><div class="lab">'+(frozen()?"Ready to pay "+esc(state.child):"So far this week, "+esc(state.child)+" has earned")+'</div>'+
+      '<div class="amt num">'+money(tot)+'</div>'+
+      '<div class="brk"><span>Chores '+money(base)+'</span><span>+ Jobs '+money(ex)+'</span></div></section>';
+    var brk = '<section class="card" style="padding:6px 16px">'+
+      '<div class="brkline"><span>Weekly chores '+
+      (allSecured()?'<span class="tag perfect">full jar</span>':'<span class="tag part">'+got+'/'+t+' stars</span>')+
+      '<span class="s">'+(t? money(state.base/t)+" per star":"no chores set up")+'</span></span><span class="v num">'+money(base)+'</span></div>'+
+      '<div class="brkline"><span>Side hustle 💼<span class="s">extra jobs approved this week</span></span><span class="v num">'+money(ex)+'</span></div>'+
+      '<div class="brkline"><span><b>Payday total</b></span><span class="v num">'+money(tot)+'</span></div></section>';
     var payBtn = role==="parent"
-      ? '<button class="btn wide gold" data-act="pay" style="margin:14px 0" '+(tot<=0?"disabled":"")+'>💸 Pay $'+tot+' & start next week</button>'
-      : '<div class="hint" style="text-align:center;margin:14px 0">A parent taps “Pay” on Friday to send it and start a fresh week.</div>';
-    var stats = '<div class="stat2"><div class="card"><div class="k num">$'+state.lifetime+'</div><div class="l">Earned all-time</div></div>'+
+      ? '<button class="btn wide gold" data-act="pay" style="margin:14px 0" '+(tot<=0?"disabled":"")+'>💸 Pay '+money(tot)+' & start next week</button>'
+      : '<div class="hint" style="text-align:center;margin:14px 0">A parent taps “Pay” to send it and start a fresh week.</div>';
+    var stats = '<div class="stat2"><div class="card"><div class="k num">'+money(state.lifetime)+'</div><div class="l">Earned all-time</div></div>'+
       '<div class="card"><div class="k num">'+state.history.length+'</div><div class="l">Weeks paid</div></div></div>';
-    var hist = state.history.length
-      ? '<div class="sectlabel">Payday history</div><section class="card hist">'+
-        state.history.slice(0,12).map(function(h){
-          return '<div class="histrow"><div><div>'+fmtWeek(h.week)+'</div><div class="d">'+
-            (h.perfect?'<span class="tag perfect">perfect week</span>':'<span class="tag part">partial</span>')+'</div></div>'+
-            '<span class="num">$'+h.total+'</span></div>';
-        }).join("")+'</section>'
-      : "";
-    return big + brk + payBtn + stats + hist;
+    return big + brk + payBtn + stats;
+  }
+
+  function viewHistory(){
+    var stats = '<div class="stat2"><div class="card"><div class="k num">'+money(state.lifetime)+'</div><div class="l">All-time</div></div>'+
+      '<div class="card"><div class="k num">'+money(state.lifetimeExtras)+'</div><div class="l">From jobs</div></div>'+
+      '<div class="card"><div class="k num">'+state.perfectWeeks+'</div><div class="l">Full jars</div></div></div>';
+    var rows = state.history.length
+      ? '<section class="card hist">'+ state.history.map(function(h){
+          return '<div class="histrow"><div style="min-width:0">'+
+            '<div>'+fmtWeek(h.week)+'</div>'+
+            '<div class="d">'+(h.perfect?'<span class="tag perfect">full jar</span>':'<span class="tag part">partial</span>')+
+            ' &nbsp;chores '+money(h.base)+' · jobs '+money(h.extras)+'</div></div>'+
+            '<span class="amt num">'+money(h.total)+'</span></div>';
+        }).join("") + '</section>'
+      : '<section class="card empty">No paydays logged yet. Once a parent taps “Pay”, every week lands here.</section>';
+    var note = '<div class="hint" style="text-align:center;margin-top:12px">Keeps the last 10 paydays — that\'s all that fits in the free sync channel.</div>';
+    return '<div class="sectlabel">Payday history</div>' + stats + rows + note;
   }
 
   function viewWins(){
-    var b = [
-      {em:"🌟", n:"First Payday",  d:"Get paid once",   on:state.history.length>=1},
-      {em:"🔥", n:"On Fire",       d:"3-week streak",   on:state.streak>=3},
-      {em:"💎", n:"Flawless Four", d:"4 perfect weeks", on:state.perfectWeeks>=4},
-      {em:"💼", n:"Side Hustler",  d:"$25 from jobs",   on:state.lifetimeExtras>=25},
-      {em:"🏦", n:"Big Saver",     d:"$100 all-time",   on:state.lifetime>=100},
-      {em:"👑", n:"Coin Royalty",  d:"$250 all-time",   on:state.lifetime>=250}
-    ];
     var streak = '<section class="card streakcard"><div class="big num">🔥 '+state.streak+'</div>'+
       '<div class="l">week streak — keep it going!</div></section>';
-    var grid = '<div class="badges">'+b.map(function(x){
-      return '<section class="card badge '+(x.on?"on":"")+'"><div class="em">'+x.em+'</div>'+
+    var got = BADGES.filter(function(x){ return x.on(); }).length;
+    var grid = '<div class="badges">'+BADGES.map(function(x){
+      var on=x.on();
+      return '<section class="card badge '+(on?"on":"")+'"><div class="em">'+x.em+'</div>'+
         '<div class="bn">'+x.n+'</div><div class="bd">'+x.d+'</div></section>';
     }).join("")+'</div>';
-    var settings = role==="parent"
-      ? '<div class="sectlabel">Parent settings</div><section class="card" style="padding:8px 6px">'+
-        '<button class="btn wide ghost" data-act="settings" style="margin:6px 0">⚙️ Name, amount, PIN & sound</button>'+
-        '<button class="btn wide coral" data-act="resetall" style="margin:6px 0">↺ Reset everything</button>'+
-        '<div style="text-align:center;color:var(--ink-soft);font-size:11px;font-weight:600;margin-top:6px">Coin Club '+APP_VERSION+(cloudOn?' · ☁️ synced':' · not synced yet')+'</div></section>'
-      : "";
-    return streak + '<div class="sectlabel">Badges</div>' + grid + settings;
+    return streak + '<div class="sectlabel">Badges<span style="color:var(--ink-soft);font-size:12.5px">'+got+' of '+BADGES.length+'</span></div>' + grid +
+      '<div class="hint" style="text-align:center;margin-top:14px">Coin Club '+APP_VERSION+(cloudOn?' · ☁️ synced':' · not synced yet')+'</div>';
   }
 
   function renderNav(){
-    var items=[["week","🏠","Week"],["jobs","💼","Jobs"],["wallet","👛","Wallet"],["wins","🏅","Wins"]];
+    var items=[["week","🏠","Week"],["jobs","💼","Jobs"],["wallet","👛","Wallet"],["history","📜","History"],["wins","🏅","Wins"]];
     document.getElementById("nav").innerHTML = items.map(function(it){
       return '<button data-act="tab" data-t="'+it[0]+'" class="'+(tab===it[0]?"active":"")+'">'+
         '<span class="ni">'+it[1]+'</span>'+it[2]+'</button>';
     }).join("");
   }
 
-  /* ---------- actions ---------- */
+  /* ---------- actions (every one confirms) ---------- */
   document.addEventListener("click", function(ev){
     var t = ev.target.closest("[data-act]"); if(!t) return;
     var a = t.getAttribute("data-act");
+    var jid=t.getAttribute("data-j"), cid=t.getAttribute("data-c");
 
     if(a==="tab"){ tab=t.getAttribute("data-t"); render(); return; }
-    if(a==="role"){ role==="parent" ? setRole("katia") : askPin(); return; }
-    if(a==="slot"){ onSlot(t.getAttribute("data-c"), +t.getAttribute("data-i")); return; }
+    if(a==="closesheet"){ closeSheet(); return; }
+    if(a==="role"){ role==="parent" ? parentDash() : askPin(); return; }
+    if(a==="slot"){ onSlot(cid, +t.getAttribute("data-i")); return; }
 
-    var jid=t.getAttribute("data-j");
-    if(a==="claim"){ setJob(jid,"claimed"); return; }
-    if(a==="unclaim"){ setJob(jid,"open"); return; }
-    if(a==="markjob"){ var j=findJob(jid); setJob(jid,"pending"); if(role==="katia"&&j){ notify(state.child+" finished a job", j.name+" ($"+j.price+") — tap to approve"); beepCoin(); } return; }
-    if(a==="rejectjob"){ setJob(jid,"claimed"); return; }
-    if(a==="payjob"){ payJob(jid); return; }
-    if(a==="postjob"){ setJob(jid,"open"); return; }
-    if(a==="deljob"){ state.jobs=state.jobs.filter(function(x){return x.id!==jid;}); save(); render(); return; }
+    if(a==="claim"){ var jc=findJob(jid); if(!jc) return;
+      confirmAction({title:"Claim this job?", msg:"You're taking on <b>"+esc(jc.name)+"</b> for <b>"+money(jc.price)+"</b>. Finish it and snap a photo to get paid.",
+        ok:"Yes, claim it", onOk:function(){ state.ach.gg=1; setJob(jid,"claimed"); }}); return; }
+
+    if(a==="unclaim"){ var ju=findJob(jid); if(!ju) return;
+      confirmAction({title:"Put it back on the board?", msg:"<b>"+esc(ju.name)+"</b> goes back to the job board and "+esc(state.child)+" is no longer claiming it.",
+        ok:"Return it", tone:"coral", onOk:function(){ setJob(jid,"open"); }}); return; }
+
+    if(a==="markjob"){ markJobDone(jid); return; }
+
+    if(a==="rejectjob"){ var jr=findJob(jid); if(!jr) return;
+      confirmAction({title:"Send it back?", msg:"<b>"+esc(jr.name)+"</b> goes back to “claimed” so "+esc(state.child)+" can redo it. No money is paid.",
+        ok:"Send back", tone:"coral", img:PhotoStore.get("j:"+jid), onOk:function(){ PhotoStore.del("j:"+jid); setJob(jid,"claimed"); }}); return; }
+
+    if(a==="payjob"){ var jp=findJob(jid); if(!jp) return;
+      confirmAction({title:"Approve "+money(jp.price)+"?", msg:"<b>"+esc(jp.name)+"</b> gets approved and "+money(jp.price)+" stacks on top of this week's jar.",
+        ok:"Approve "+money(jp.price), tone:"mint", img:PhotoStore.get("j:"+jid), onOk:function(){ payJob(jid); }}); return; }
+
+    if(a==="postjob"){ var jo=findJob(jid); if(!jo) return;
+      confirmAction({title:"Post this job?", msg:"<b>"+esc(jo.name)+"</b> goes live on the board at <b>"+money(jo.price)+"</b> for "+esc(state.child)+" to claim.",
+        ok:"Post it", tone:"mint", onOk:function(){ state.ach.en=1; setJob(jid,"open"); notify(state.child+", your idea got posted!", jo.name+" is live for "+money(jo.price)); }}); return; }
+
+    if(a==="deljob"){ var jd=findJob(jid); if(!jd) return;
+      confirmAction({title:"Delete this job?", msg:"<b>"+esc(jd.name)+"</b> is removed from the board for good.",
+        ok:"Delete", tone:"coral", onOk:function(){ state.jobs=state.jobs.filter(function(x){return x.id!==jid;}); save(); render(); }}); return; }
+
     if(a==="addjob"){ jobSheet(); return; }
     if(a==="propose"){ proposeSheet(); return; }
+    if(a==="addchore"){ choreSheet(null); return; }
+    if(a==="editchore"){ choreSheet(findChore(cid)); return; }
 
-    if(a==="addchore"){ choreSheet(); return; }
-    if(a==="delchore"){ var cid=t.getAttribute("data-c"); state.required=state.required.filter(function(c){return c.id!==cid;}); delete state.marks[cid]; save(); render(); return; }
+    if(a==="delchore"){ var cd=findChore(cid); if(!cd) return;
+      confirmAction({title:"Delete this chore?", msg:"<b>"+esc(cd.name)+"</b> and its stars are removed. The other chores split the "+money(state.base)+" between them instead.",
+        ok:"Delete", tone:"coral", onOk:function(){ state.required=state.required.filter(function(c){return c.id!==cid;}); delete state.marks[cid]; save(); render(); }}); return; }
 
-    if(a==="approve"){ doApprove(t.getAttribute("data-kind"), t.getAttribute("data-id"), +t.getAttribute("data-i")); save(); burst(); render(); approvalSheet(); return; }
+    if(a==="approve"){ approveOne(t.getAttribute("data-kind"), t.getAttribute("data-id"), +t.getAttribute("data-i")); return; }
+    if(a==="approveall"){ confirmApproveAll(); return; }
 
     if(a==="pay"){ confirmPay(); return; }
+    if(a==="newweek"){ confirmNewWeek(); return; }
     if(a==="settings"){ settingsSheet(); return; }
     if(a==="resetall"){ confirmReset(); return; }
-
-    if(a==="closesheet"){ closeSheet(); return; }
+    if(a==="exitparent"){ closeSheet(); setRole("katia"); return; }
   });
 
+  /* ---------- chore star: camera → confirm ---------- */
   function onSlot(cid,i){
-    var c=state.required.find(function(x){return x.id===cid;}); if(!c) return;
-    var m=marksFor(c), was=allSecured();
-    if(role==="parent"){ m[i] = m[i]===2 ? 0 : 2; }
-    else { if(m[i]===2) return; m[i] = m[i]===1 ? 0 : 1; }
-    var justDone = role==="katia" && m[i]===1;
-    save();
-    if(justDone){ notify(state.child+" finished a chore", c.name+" — tap to approve ✓"); beepCoin(); }
-    if(!was && allSecured()) burst();
-    render();
-    if(justDone) popSlot(cid,i);
+    var c=findChore(cid); if(!c) return;
+    var m=marksFor(c);
+
+    if(role==="parent"){
+      var isOn = m[i]===2;
+      var when = c.layout==="week" ? DAYFULL[i] : "star "+(i+1);
+      confirmAction({
+        title: isOn ? "Undo this approval?" : "Approve "+esc(c.name)+"?",
+        msg: isOn ? "Takes back <b>"+esc(when)+"</b> for <b>"+esc(c.name)+"</b> and removes "+money(choreValue(c)/c.need)+" from the jar."
+                  : "<b>"+esc(when)+"</b> · worth <b>"+money(choreValue(c)/c.need)+"</b> toward this week.",
+        ok: isOn ? "Undo it" : "Approve ✓", tone: isOn?"coral":"mint",
+        img: PhotoStore.get("c:"+cid+":"+i),
+        onOk:function(){
+          var was=allSecured();
+          m[i] = isOn ? 0 : 2;
+          if(!isOn) PhotoStore.del("c:"+cid+":"+i);
+          touchBadges(); save();
+          if(!was && allSecured()) burst();
+          render();
+        }
+      });
+      return;
+    }
+
+    if(frozen()){
+      confirmAction({title:"This week is locked 🔒", msg:"The week ended and is waiting on a parent to pay it out. Once they do, a fresh week starts and you can keep earning.", ok:"Got it", onOk:function(){}});
+      return;
+    }
+    if(m[i]===2) return;                       // already approved — nothing to do
+    if(m[i]===1){                              // undo a pending mark
+      confirmAction({title:"Undo this one?", msg:"Takes back your <b>"+esc(c.name)+"</b> mark. You can always do it again.",
+        ok:"Undo", tone:"coral", onOk:function(){ m[i]=0; PhotoStore.del("c:"+cid+":"+i); save(); render(); }});
+      return;
+    }
+    if(c.photo===false){ confirmChoreDone(c,i,null,null); return; }
+
+    openSheet('<h3>Show your work 📷</h3><div class="shooting">Opening the camera…</div>');
+    takePhoto(function(res){
+      if(!res){ closeSheet(); return; }
+      confirmChoreDone(c,i,res.url,res.blob);
+    });
+  }
+
+  function confirmChoreDone(c,i,url,blob){
+    var when = c.layout==="week" ? DAYFULL[i] : "this week";
+    var retake = c.photo===false ? "" :
+      '<button class="btn wide ghost" id="__retake" style="margin-top:8px">📷 Retake the photo</button>';
+    openSheet('<h3>Nice! Did you finish it?</h3>'+
+      '<p class="csub"><b>'+esc(c.name)+'</b> · '+esc(when)+' · worth <b>'+money(choreValue(c)/c.need)+'</b></p>'+
+      (url?'<img class="proof" src="'+url+'" alt="Your photo">':"")+
+      '<div class="sheetbtns"><button class="btn wide ghost" data-act="closesheet">Cancel</button>'+
+      '<button class="btn wide mint" id="__ok">Yes, I did it ✓</button></div>'+ retake);
+    var rt=document.getElementById("__retake");
+    if(rt) rt.onclick=function(){
+      openSheet('<h3>Show your work 📷</h3><div class="shooting">Opening the camera…</div>');
+      takePhoto(function(res){ if(!res){ closeSheet(); return; } confirmChoreDone(c,i,res.url,res.blob); });
+    };
+    document.getElementById("__ok").onclick=function(){
+      closeSheet();
+      var m=marksFor(c); m[i]=1;
+      if(url) PhotoStore.put("c:"+c.id+":"+i, url);
+      if(new Date().getHours()<9) state.ach.eb=1;
+      save(); render(); popSlot(c.id,i); beepCoin();
+      notifyPhoto(state.child+" finished a chore", c.name+" ("+when+") - tap to approve", blob);
+    };
+  }
+
+  /* ---------- job done: camera → confirm ---------- */
+  function markJobDone(jid){
+    var j=findJob(jid); if(!j) return;
+    openSheet('<h3>Show your work 📷</h3><div class="shooting">Opening the camera…</div>');
+    takePhoto(function(res){
+      if(!res){ closeSheet(); return; }
+      openSheet('<h3>Send it for approval?</h3>'+
+        '<p class="csub"><b>'+esc(j.name)+'</b> · pays <b>'+money(j.price)+'</b></p>'+
+        '<img class="proof" src="'+res.url+'" alt="Your photo">'+
+        '<div class="sheetbtns"><button class="btn wide ghost" data-act="closesheet">Cancel</button>'+
+        '<button class="btn wide mint" id="__ok">Yes, I finished ✓</button></div>'+
+        '<button class="btn wide ghost" id="__retake" style="margin-top:8px">📷 Retake the photo</button>');
+      document.getElementById("__retake").onclick=function(){ markJobDone(jid); };
+      document.getElementById("__ok").onclick=function(){
+        closeSheet();
+        PhotoStore.put("j:"+jid, res.url);
+        setJob(jid,"pending"); beepCoin();
+        notifyPhoto(state.child+" finished a job", j.name+" ("+money(j.price)+") - tap to approve", res.blob);
+      };
+    });
+  }
+
+  /* ---------- camera ---------- */
+  function takePhoto(cb){
+    var inp=document.createElement("input");
+    inp.type="file"; inp.accept="image/*";
+    inp.setAttribute("capture","environment");   /* forces the camera, not the photo library */
+    inp.style.cssText="position:fixed;left:-9999px;top:0;opacity:0";
+    document.body.appendChild(inp);
+    var done=false;
+    inp.onchange=function(){
+      if(done) return; done=true;
+      var f=inp.files&&inp.files[0];
+      try{ document.body.removeChild(inp); }catch(e){}
+      if(!f){ cb(null); return; }
+      shrink(f, cb);
+    };
+    /* if they back out of the camera, no change event ever fires — clean up on return */
+    window.addEventListener("focus", function once(){
+      window.removeEventListener("focus", once);
+      setTimeout(function(){
+        if(done) return;
+        if(!(inp.files&&inp.files.length)){ done=true; try{ document.body.removeChild(inp); }catch(e){} cb(null); }
+      }, 900);
+    });
+    inp.click();
+  }
+  function shrink(file, cb){
+    var url=URL.createObjectURL(file), img=new Image();
+    img.onload=function(){
+      var max=720, sc=Math.min(1, max/Math.max(img.width,img.height));
+      var cw=Math.max(1,Math.round(img.width*sc)), ch=Math.max(1,Math.round(img.height*sc));
+      var cn=document.createElement("canvas"); cn.width=cw; cn.height=ch;
+      cn.getContext("2d").drawImage(img,0,0,cw,ch);
+      URL.revokeObjectURL(url);
+      var dataUrl;
+      try{ dataUrl=cn.toDataURL("image/jpeg",0.6); }catch(e){ dataUrl=null; }
+      if(cn.toBlob){ cn.toBlob(function(b){ cb({url:dataUrl, blob:b||file}); }, "image/jpeg", 0.6); }
+      else cb({url:dataUrl, blob:file});
+    };
+    img.onerror=function(){ URL.revokeObjectURL(url); cb({url:null, blob:file}); };
+    img.src=url;
   }
 
   function setRole(r){ role=r; render(); }
@@ -748,73 +1047,165 @@
   function payJob(id){
     var j=findJob(id); if(!j) return;
     state.earnings.push({id:uid(),label:j.name,amount:j.price,week:state.weekStart,ts:Date.now()});
+    state.jobsDone++; state.ach.fj=1;
+    PhotoStore.del("j:"+id);
     if(j.proposed){ state.jobs=state.jobs.filter(function(x){return x.id!==id;}); }
     else j.status="open";
-    save(); burst(); render();
+    touchBadges(); save(); burst(); render();
   }
 
+  /* ---------- payday & week control (parent only, never automatic) ---------- */
   function confirmPay(){
-    var tot=projected();
-    openSheet('<h3>Send $'+tot+' to '+esc(state.child)+'?</h3>'+
-      '<p style="color:var(--ink-soft);font-weight:600;font-size:13.5px;margin-top:-6px">This logs the payday and starts a fresh Saturday–Friday week. Do your bank transfer for <b>$'+tot+'</b>, then confirm.</p>'+
-      sheetButtons("Confirm payday"));
-    document.getElementById("__ok").onclick=function(){
-      var perfect=allSecured(), ex=weekExtras(), base=perfect?state.base:0, total=base+ex;
-      state.lifetime+=total; state.lifetimeExtras+=ex;
-      if(perfect){ state.perfectWeeks++; state.streak++; } else state.streak=0;
-      state.history.unshift({week:state.weekStart,base:base,extras:ex,total:total,perfect:perfect,ts:Date.now()});
-      state.weekStart=startOfWeek(new Date()).toISOString(); state.marks={};
-      save(); closeSheet(); tab="wallet"; burst(); render();
-    };
+    var base=baseEarned(), ex=weekExtras(), tot=round2(base+ex);
+    confirmAction({
+      title:"Send "+money(tot)+" to "+esc(state.child)+"?",
+      msg:"Chores <b>"+money(base)+"</b> + side hustle <b>"+money(ex)+"</b>.<br>This logs the payday and starts a fresh Saturday–Friday week. Do your bank transfer for <b>"+money(tot)+"</b>, then confirm.",
+      ok:"Confirm payday", tone:"gold",
+      onOk:function(){
+        var perfect=allSecured();
+        state.lifetime=round2(state.lifetime+tot); state.lifetimeExtras=round2(state.lifetimeExtras+ex);
+        if(perfect){ state.perfectWeeks++; state.streak++; } else state.streak=0;
+        state.history.unshift({week:state.weekStart,base:round2(base),extras:round2(ex),total:tot,perfect:perfect,ts:Date.now()});
+        state.weekStart=nextWeekStart(); state.marks={}; state.earnings=[];
+        PhotoStore.clear();
+        touchBadges(); save(); tab="history"; burst(); render();
+        notify("Payday!", state.child+" was paid "+money(tot)+" - a fresh week just started");
+      }
+    });
+  }
+  function confirmNewWeek(){
+    confirmAction({
+      title:"Start a new week without paying?",
+      msg:"Clears every star and this week's job money <b>without logging a payday</b>. Use this to fix a mistake, not on payday.",
+      ok:"Start fresh week", tone:"coral",
+      onOk:function(){ state.weekStart=nextWeekStart(); state.marks={}; state.earnings=[]; PhotoStore.clear(); save(); render(); }
+    });
   }
 
   /* ---------- approvals ---------- */
   function pendingApprovals(){
     var items=[];
-    state.required.forEach(function(c){ marksFor(c).forEach(function(v,i){ if(v===1) items.push({kind:"chore",id:c.id,i:i,icon:c.icon,name:c.name,when:(c.layout==="week"?DAYFULL[i]:"this week")}); }); });
-    state.jobs.forEach(function(j){ if(j.status==="pending") items.push({kind:"job",id:j.id,i:-1,icon:j.icon,name:j.name,amount:j.price}); });
+    state.required.forEach(function(c){ marksFor(c).forEach(function(v,i){ if(v===1) items.push({kind:"chore",id:c.id,i:i,icon:c.icon,name:c.name,when:(c.layout==="week"?DAYFULL[i]:"this week"),value:choreValue(c)/c.need}); }); });
+    state.jobs.forEach(function(j){ if(j.status==="pending") items.push({kind:"job",id:j.id,i:-1,icon:j.icon,name:j.name,value:j.price}); });
     return items;
   }
-  function showApprovalsIfAny(){ if(pendingApprovals().length) approvalSheet(); }
-  function approvalSheet(){
-    var items=pendingApprovals();
-    if(!items.length){ closeSheet(); return; }
-    var rows=items.map(function(it){
-      var right = it.kind==="job" ? ("Extra job · $"+it.amount) : it.when;
-      return '<div class="aprow"><div class="apico">'+it.icon+'</div>'+
+  function approvalRows(items){
+    return items.map(function(it){
+      var key = it.kind==="job" ? ("j:"+it.id) : ("c:"+it.id+":"+it.i);
+      var img = PhotoStore.get(key);
+      var right = it.kind==="job" ? ("Extra job · "+money(it.value)) : (it.when+" · "+money(it.value));
+      return '<div class="aprow"><div class="apico">'+(img?'<img src="'+img+'" alt="">':it.icon)+'</div>'+
         '<div class="apmeta"><div class="n">'+esc(it.name)+'</div><div class="w">'+esc(right)+'</div></div>'+
         '<button class="apok" data-act="approve" data-kind="'+it.kind+'" data-id="'+it.id+'" data-i="'+it.i+'">Approve ✓</button></div>';
     }).join("");
-    openSheet('<h3>Needs your approval ('+items.length+')</h3>'+
-      '<div style="max-height:52vh;overflow-y:auto">'+rows+'</div>'+
-      '<div class="sheetbtns"><button class="btn wide ghost" data-act="closesheet">Close</button>'+
-      '<button class="btn wide mint" id="__all">Approve all</button></div>');
-    document.getElementById("__all").onclick=function(){
-      items.forEach(function(it){ doApprove(it.kind,it.id,it.i); }); save(); burst(); render(); approvalSheet();
-    };
+  }
+  function approveOne(kind,id,i){
+    var items=pendingApprovals();
+    var it=items.find(function(x){ return x.kind===kind && x.id===id && x.i===i; });
+    if(!it) return;
+    var key = kind==="job" ? ("j:"+id) : ("c:"+id+":"+i);
+    confirmAction({
+      title:"Approve "+money(it.value)+"?",
+      msg:"<b>"+esc(it.name)+"</b>"+(kind==="job"?" · extra job":" · "+esc(it.when)),
+      ok:"Approve ✓", tone:"mint", img:PhotoStore.get(key),
+      onOk:function(){ doApprove(kind,id,i); touchBadges(); save(); burst(); render(); parentDash(); }
+    });
+  }
+  function confirmApproveAll(){
+    var items=pendingApprovals();
+    if(!items.length) return;
+    var sum=items.reduce(function(a,x){ return a+x.value; },0);
+    confirmAction({
+      title:"Approve all "+items.length+"?",
+      msg:"Approves every pending item at once — <b>"+money(sum)+"</b> total.",
+      ok:"Approve all ✓", tone:"mint",
+      onOk:function(){ items.forEach(function(it){ doApprove(it.kind,it.id,it.i); }); touchBadges(); save(); burst(); render(); parentDash(); }
+    });
   }
   function doApprove(kind,id,i){
-    if(kind==="chore"){ var c=state.required.find(function(x){return x.id===id;}); if(c){ marksFor(c)[i]=2; } }
-    else { var j=findJob(id); if(j){ state.earnings.push({id:uid(),label:j.name,amount:j.price,week:state.weekStart,ts:Date.now()}); if(j.proposed) state.jobs=state.jobs.filter(function(x){return x.id!==id;}); else j.status="open"; } }
+    if(kind==="chore"){
+      var c=findChore(id); if(c){ marksFor(c)[i]=2; PhotoStore.del("c:"+id+":"+i); }
+    } else {
+      var j=findJob(id);
+      if(j){
+        state.earnings.push({id:uid(),label:j.name,amount:j.price,week:state.weekStart,ts:Date.now()});
+        state.jobsDone++; state.ach.fj=1; PhotoStore.del("j:"+id);
+        if(j.proposed) state.jobs=state.jobs.filter(function(x){return x.id!==id;});
+        else j.status="open";
+      }
+    }
   }
 
   /* ---------- sheets ---------- */
   var scrim=document.getElementById("scrim"), sheet=document.getElementById("sheet");
-  function openSheet(html){ sheet.innerHTML=html; scrim.classList.add("on"); }
+  function openSheet(html){ sheet.innerHTML=html; scrim.classList.add("on"); sheet.scrollTop=0; }
   function closeSheet(){ scrim.classList.remove("on"); }
   scrim.addEventListener("click",function(e){ if(e.target===scrim) closeSheet(); });
   function sheetButtons(okLabel){ return '<div class="sheetbtns"><button class="btn wide ghost" data-act="closesheet">Cancel</button>'+
     '<button class="btn wide" id="__ok">'+okLabel+'</button></div>'; }
 
+  /* every action routes through here */
+  function confirmAction(o){
+    openSheet('<h3>'+esc(o.title)+'</h3>'+
+      (o.msg?'<p class="csub">'+o.msg+'</p>':"")+
+      (o.img?'<img class="proof" src="'+o.img+'" alt="Photo proof">':"")+
+      '<div class="sheetbtns"><button class="btn wide ghost" data-act="closesheet">Cancel</button>'+
+      '<button class="btn wide '+(o.tone||"")+'" id="__ok">'+esc(o.ok||"Confirm")+'</button></div>');
+    document.getElementById("__ok").onclick=function(){ closeSheet(); o.onOk(); };
+  }
+
   function askPin(){
     openSheet('<h3>Parent mode 🔒</h3>'+
-      '<p style="color:var(--ink-soft);font-weight:600;font-size:13px;margin-top:-6px">Enter the parent PIN so approvals stay with mom &amp; dad.</p>'+
+      '<p class="csub">Enter the parent PIN so approvals stay with mom &amp; dad.</p>'+
       '<div class="field"><input id="pin" type="tel" inputmode="numeric" maxlength="8" placeholder="•••••" style="text-align:center;letter-spacing:8px;font-size:22px"></div>'+
       sheetButtons("Unlock"));
     var inp=document.getElementById("pin"); inp.focus();
     document.getElementById("__ok").onclick=function(){
-      if(inp.value===String(state.pin)){ closeSheet(); setRole("parent"); showApprovalsIfAny(); }
+      if(inp.value===String(state.pin)){ setRole("parent"); parentDash(); }
       else { inp.value=""; inp.placeholder="wrong PIN"; inp.style.borderColor="var(--coral)"; }
+    };
+  }
+
+  /* ---------- parent dashboard ---------- */
+  function parentDash(){
+    var items=pendingApprovals();
+    var base=baseEarned(), ex=weekExtras(), tot=round2(base+ex);
+    var t=totalNeed();
+
+    var approvals = items.length
+      ? '<div class="dashsec">Needs your approval ('+items.length+')</div>'+
+        '<div class="dashbox" style="max-height:40vh;overflow-y:auto">'+approvalRows(items)+'</div>'+
+        '<button class="btn wide mint" data-act="approveall" style="margin-top:10px">Approve all '+items.length+' ✓</button>'
+      : '<div class="dashsec">Approvals</div><div class="dashbox pad" style="text-align:center;color:var(--ink-soft);font-weight:700;font-size:13.5px">All caught up ✓</div>';
+
+    var summary = '<div class="dashsec">This week'+(frozen()?" · 🔒 finished":"")+'</div>'+
+      '<div class="dashnum"><div><div class="k num">'+money(base)+'</div><div class="l">CHORES</div></div>'+
+      '<div><div class="k num">'+money(ex)+'</div><div class="l">SIDE HUSTLE</div></div>'+
+      '<div><div class="k num">'+money(tot)+'</div><div class="l">PAYDAY</div></div></div>';
+
+    var allow = '<div class="dashsec">Weekly allowance</div>'+
+      '<div class="allowrow"><div class="field"><label>Split across '+t+' star'+(t===1?"":"s")+' · '+(t?money(state.base/t):"$0")+' each</label>'+
+      '<input id="dashbase" type="tel" inputmode="decimal" value="'+state.base+'"></div>'+
+      '<button class="btn" id="__setbase" style="padding:13px 18px;border-radius:13px">Save</button></div>';
+
+    var actions = '<div class="dashsec">Week controls</div>'+
+      '<div class="sheetbtns stack">'+
+      '<button class="btn wide gold" data-act="pay" '+(tot<=0?"disabled":"")+'>💸 Pay '+money(tot)+' & start next week</button>'+
+      '<button class="btn wide ghost" data-act="newweek">↻ Start a new week without paying</button>'+
+      '<button class="btn wide ghost" data-act="settings">⚙️ Name, PIN &amp; sound</button>'+
+      '<button class="btn wide coral" data-act="resetall">⚠️ Reset everything</button>'+
+      '<button class="btn wide ghost" data-act="exitparent">Exit parent mode</button>'+
+      '</div>'+
+      '<div style="text-align:center;color:var(--ink-soft);font-size:11px;font-weight:600;margin-top:12px">Coin Club '+APP_VERSION+(cloudOn?' · ☁️ synced':' · not synced yet')+'</div>';
+
+    openSheet('<h3>Parent dashboard</h3>'+approvals+summary+allow+actions);
+
+    document.getElementById("__setbase").onclick=function(){
+      var v=parseFloat(document.getElementById("dashbase").value);
+      if(!(v>=0)) return;
+      confirmAction({title:"Set the weekly allowance to "+money(v)+"?",
+        msg:"Every chore re-splits automatically — each star becomes worth <b>"+(t?money(v/t):"$0")+"</b>. This week's earned total recalculates too.",
+        ok:"Save "+money(v), onOk:function(){ state.base=round2(v); save(); render(); parentDash(); }});
     };
   }
 
@@ -870,20 +1261,51 @@
     if(v==="daily"){ chore.layout="week"; chore.slots=7; chore.need=6; }
     else { var n=+v; chore.layout="stars"; chore.slots=n; chore.need=n; }
   }
+  function wireToggle(){
+    var t=document.getElementById("__photog"); if(!t) return;
+    t.onclick=function(){ t.classList.toggle("on"); };
+  }
+  function photoToggleHTML(on){
+    return '<div class="toggrow"><div><div class="tl">📷 Needs a photo</div>'+
+      '<div class="td">She has to snap a picture with the camera — no picking from her photo library. Turn this off for things a photo can\'t show, like reading or brushing teeth.</div></div>'+
+      '<button type="button" class="tog '+(on?"on":"")+'" id="__photog" aria-label="Needs a photo"></button></div>';
+  }
 
-  function choreSheet(){
-    openSheet('<h3>New required chore</h3>'+
-      '<div class="field"><label>Start from the chore library</label>'+libSelectHTML()+'</div>'+
-      '<div class="field"><label>Name</label><input id="cn" placeholder="e.g. Feed the fish"></div>'+
-      '<div class="field"><label>Icon</label>'+iconPicker("🧹")+'</div>'+
-      '<div class="field"><label>How often?</label>'+freqSelectHTML("daily")+'</div>'+
-      sheetButtons("Add chore"));
-    wireIcon(); wireLib();
+  function choreSheet(existing){
+    var isEdit=!!existing;
+    openSheet('<h3>'+(isEdit?"Edit chore":"New required chore")+'</h3>'+
+      (isEdit?"":'<div class="field"><label>Start from the chore library</label>'+libSelectHTML()+'</div>')+
+      '<div class="field"><label>Name</label><input id="cn" placeholder="e.g. Feed the fish" value="'+(isEdit?esc(existing.name):"")+'"></div>'+
+      '<div class="field"><label>Icon</label>'+iconPicker(isEdit?existing.icon:"🧹")+'</div>'+
+      '<div class="field"><label>How often?</label>'+freqSelectHTML(isEdit?freqOf(existing):"daily")+'</div>'+
+      photoToggleHTML(isEdit ? existing.photo!==false : true)+
+      sheetButtons(isEdit?"Save changes":"Add chore"));
+    wireIcon(); wireLib(); wireToggle();
     document.getElementById("__ok").onclick=function(){
       var name=document.getElementById("cn").value.trim(); if(!name) return;
-      var chore={id:uid(),name:name,icon:pickedEmo("🧹")};
-      applyFreq(chore, document.getElementById("cl").value);
-      state.required.push(chore); save(); closeSheet(); render();
+      var freq=document.getElementById("cl").value;
+      var icon=pickedEmo(isEdit?existing.icon:"🧹");
+      var wantsPhoto=document.getElementById("__photog").classList.contains("on");
+      var t=totalNeed();
+      var probe={need:(freq==="daily"?6:+freq)};
+      var newTotal=isEdit ? t-existing.need+probe.need : t+probe.need;
+      var per = newTotal ? money(state.base/newTotal) : "$0";
+      confirmAction({
+        title:isEdit?"Save changes to "+esc(name)+"?":"Add “"+esc(name)+"”?",
+        msg:"Every star will be worth <b>"+per+"</b> once this is saved — the "+money(state.base)+" re-splits across all chores automatically.",
+        ok:isEdit?"Save":"Add chore", tone:"mint",
+        onOk:function(){
+          if(isEdit){
+            existing.name=name; existing.icon=icon; existing.photo=wantsPhoto;
+            var oldSlots=existing.slots; applyFreq(existing,freq);
+            if(existing.slots!==oldSlots) delete state.marks[existing.id];
+          } else {
+            var chore={id:uid(),name:name,icon:icon,photo:wantsPhoto};
+            applyFreq(chore,freq); state.required.push(chore);
+          }
+          save(); render();
+        }
+      });
     };
   }
 
@@ -891,55 +1313,67 @@
     openSheet('<h3>New extra job</h3>'+
       '<div class="field"><label>Job</label><input id="jn" placeholder="e.g. Sweep the garage"></div>'+
       '<div class="field"><label>Icon</label>'+iconPicker("🧰")+'</div>'+
-      '<div class="field"><label>Pays ($)</label><input id="jp" type="tel" inputmode="numeric" placeholder="5"></div>'+
+      '<div class="field"><label>Pays ($)</label><input id="jp" type="tel" inputmode="decimal" placeholder="5"></div>'+
       sheetButtons("Post job"));
     wireIcon();
     document.getElementById("__ok").onclick=function(){
-      var name=document.getElementById("jn").value.trim(), price=parseInt(document.getElementById("jp").value,10);
+      var name=document.getElementById("jn").value.trim(), price=parseFloat(document.getElementById("jp").value);
       if(!name||!(price>=0)) return;
-      state.jobs.push({id:uid(),name:name,icon:pickedEmo("🧰"),price:price,status:"open"}); save(); closeSheet(); render();
+      var icon=pickedEmo("🧰");
+      confirmAction({title:"Post “"+esc(name)+"” for "+money(price)+"?",
+        msg:"It goes live on the job board for "+esc(state.child)+" to claim. Job money stacks on top of the weekly jar.",
+        ok:"Post it", tone:"mint",
+        onOk:function(){ state.jobs.push({id:uid(),name:name,icon:icon,price:round2(price),status:"open"}); save(); render();
+          notify("New job posted", name+" - "+money(price)); }});
     };
   }
 
   function proposeSheet(){
     openSheet('<h3>Suggest a job 💡</h3>'+
-      '<p style="color:var(--ink-soft);font-weight:600;font-size:13px;margin-top:-6px">Tell mom or dad what you\'d like to do. They\'ll set the price and post it.</p>'+
+      '<p class="csub">Tell mom or dad what you\'d like to do. They\'ll set the price and post it.</p>'+
       '<div class="field"><label>What would you do?</label><input id="jn" placeholder="e.g. Organize the pantry"></div>'+
       '<div class="field"><label>Icon</label>'+iconPicker("💡")+'</div>'+
-      '<div class="field"><label>How much is it worth? (optional)</label><input id="jp" type="tel" inputmode="numeric" placeholder="$"></div>'+
+      '<div class="field"><label>How much is it worth? (optional)</label><input id="jp" type="tel" inputmode="decimal" placeholder="$"></div>'+
       sheetButtons("Send it"));
     wireIcon();
     document.getElementById("__ok").onclick=function(){
       var name=document.getElementById("jn").value.trim(); if(!name) return;
-      var price=parseInt(document.getElementById("jp").value,10); if(!(price>=0)) price=0;
-      state.jobs.push({id:uid(),name:name,icon:pickedEmo("💡"),price:price,status:"proposed",proposed:true}); save(); closeSheet(); render();
-      notify(state.child+" suggested a job 💡", name+(price?(" (thinks $"+price+")"):""));
+      var price=parseFloat(document.getElementById("jp").value); if(!(price>=0)) price=0;
+      var icon=pickedEmo("💡");
+      confirmAction({title:"Send this idea?", msg:"<b>"+esc(name)+"</b> goes to mom &amp; dad. They decide the price and whether to post it.",
+        ok:"Send it", onOk:function(){
+          state.jobs.push({id:uid(),name:name,icon:icon,price:round2(price),status:"proposed",proposed:true}); save(); render();
+          notify(state.child+" suggested a job", name+(price?(" (thinks "+money(price)+")"):""));
+        }});
     };
   }
 
   function settingsSheet(){
     openSheet('<h3>Settings</h3>'+
       '<div class="field"><label>Child\'s name</label><input id="sn" value="'+esc(state.child)+'"></div>'+
-      '<div class="field"><label>Weekly base ($)</label><input id="sb" type="tel" inputmode="numeric" value="'+state.base+'"></div>'+
       '<div class="field"><label>Parent PIN</label><input id="sp" type="tel" inputmode="numeric" value="'+esc(state.pin)+'"></div>'+
       '<div class="field"><label>Tap sounds</label><select id="ss"><option value="on"'+(state.sound!==false?" selected":"")+'>On</option><option value="off"'+(state.sound===false?" selected":"")+'>Off</option></select></div>'+
+      '<p class="csub" style="margin-top:2px">The weekly allowance is on the dashboard, right above this.</p>'+
       sheetButtons("Save"));
     document.getElementById("__ok").onclick=function(){
-      state.child=document.getElementById("sn").value.trim()||state.child;
-      var b=parseInt(document.getElementById("sb").value,10); if(b>=0) state.base=b;
-      var p=document.getElementById("sp").value.trim(); if(p) state.pin=p;
-      state.sound=document.getElementById("ss").value!=="off";
-      save(); closeSheet(); render();
+      var nm=document.getElementById("sn").value.trim()||state.child;
+      var p=document.getElementById("sp").value.trim()||state.pin;
+      var snd=document.getElementById("ss").value!=="off";
+      confirmAction({title:"Save these settings?", msg:"Name <b>"+esc(nm)+"</b> · PIN <b>"+esc(p)+"</b> · sounds <b>"+(snd?"on":"off")+"</b>",
+        ok:"Save", onOk:function(){ state.child=nm; state.pin=p; state.sound=snd; save(); render(); parentDash(); }});
     };
   }
 
   function confirmReset(){
-    openSheet('<h3>Reset everything?</h3><p style="color:var(--ink-soft);font-weight:600;font-size:13.5px;margin-top:-6px">This wipes all progress, earnings and history back to the starting setup. Can’t be undone.</p>'+
-      sheetButtons("Yes, reset"));
-    document.getElementById("__ok").onclick=function(){ state=defaultState(); role="katia"; tab="week"; save(); closeSheet(); render(); };
+    confirmAction({title:"Reset everything?",
+      msg:"This wipes all progress, earnings, badges and history back to the starting setup. <b>It can't be undone.</b>",
+      ok:"Yes, wipe it all", tone:"coral",
+      onOk:function(){ state=defaultState(); PhotoStore.clear(); role="katia"; tab="week"; save(); render(); }});
   }
 
   /* ---------- drag to reorder chores (parent) ---------- */
+  /* deliberately has no confirm — it's a continuous gesture, and a popup on every
+     drop would make reordering unusable. Order isn't money, so nothing is at risk. */
   var dragId=null;
   function idxOf(id){ return state.required.findIndex(function(c){return c.id===id;}); }
   function markHot(){ if(!dragId) return; var c=document.querySelector('[data-cid="'+dragId+'"]'); if(c) c.classList.add("draghot"); }
