@@ -130,7 +130,6 @@
   .slot.today{box-shadow:0 0 0 3px var(--grape-soft)}
   .slot.star{width:44px;height:44px;font-size:20px}
   .slot.pop{animation:slotpop .32s ease}
-  .slot.lock{opacity:.4}
   @keyframes slotpop{0%{transform:scale(1)}45%{transform:scale(1.3)}100%{transform:scale(1)}}
   .hint{font-size:11.5px;color:var(--ink-soft);font-weight:600;margin-top:2px}
 
@@ -280,7 +279,7 @@
   /* ---------- local cache ---------- */
   var KEY  = "katia-coin-club-v3";
   var PKEY = "katia-coin-club-photos";   /* photos stay LOCAL — never synced (4KB ceiling) */
-  var APP_VERSION = "v7";
+  var APP_VERSION = "v8";
   var deviceId = (function(){ try{ var d=localStorage.getItem("coinclub-device"); if(!d){ d="d"+Math.random().toString(36).slice(2,9); localStorage.setItem("coinclub-device",d);} return d; }catch(e){ return "d"+Math.random().toString(36).slice(2,9); } })();
   var Store = {
     load:function(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } },
@@ -531,9 +530,10 @@
     while(state.history.length>3 && JSON.stringify(state).length>3800 && guard<60){ state.history.pop(); guard++; }
   }
 
-  /* ---------- week state ---------- */
+  /* ---------- week state ----------
+     weekOver() is a fact used only for wording — it never locks anything.
+     A week ends when a parent taps Pay or Reset, never on its own. */
   function weekOver(){ return new Date() > weekEnd(state.weekStart); }
-  function frozen(){ return weekOver(); }
   function nextWeekStart(){
     var n=new Date(state.weekStart); n.setDate(n.getDate()+7); n.setHours(0,0,0,0);
     var cur=startOfWeek(new Date());
@@ -652,7 +652,7 @@
     var earned = baseEarned(), pct = basePct(), ex = weekExtras();
     var left = daysLeft(state.weekStart);
     var done = allSecured();
-    var isFrozen = frozen();
+    var isDue = weekOver();
 
     var status = done
       ? '<div class="jarstatus go">Full jar! '+money(state.base)+' earned 🎉</div>'
@@ -675,11 +675,11 @@
           status+ (done?'<div class="secbadge">✓ Week complete</div>':"")+'</div>'+
         '</div></section>';
 
-    var pill = isFrozen
-      ? '<section class="card frozen">🔒 <b>Payday ready.</b> This week is finished ('+fmtWeek(state.weekStart)+
-        ') and locked so nothing gets lost. A parent pays it out to start the next one.</section>'
+    var pill = isDue
+      ? '<section class="card frozen">🎉 <b>Week finished!</b> '+fmtWeek(state.weekStart)+
+        ' — waiting on a parent to pay it out. Keep going: anything you still finish counts.</section>'
       : '<div class="weekpill">📅 <b>This week</b> · '+fmtWeek(state.weekStart)+
-        ' · <span class="left">'+(left===0?"last day!":left+" days left")+'</span></div>';
+        ' · <span class="left">'+(left<=1?"last day!":left+" days left")+'</span></div>';
 
     var list = state.required.map(choreCard).join("") ||
       '<div class="card empty">No required chores yet. Switch to Parent to add some.</div>';
@@ -688,9 +688,7 @@
 
     var hint = role==="parent"
       ? '<div class="hint" style="text-align:center;margin-top:6px">Drag the ⠿ handle to reorder · tap a day-dot to approve or undo</div>'
-      : (isFrozen
-          ? '<div class="hint" style="text-align:center;margin-top:6px">The week is locked — ask a parent to pay it out.</div>'
-          : '<div class="hint" style="text-align:center;margin-top:6px">Tap a day, snap a photo of your work, and a parent approves it ✓</div>');
+      : '<div class="hint" style="text-align:center;margin-top:6px">Tap a day, snap a photo of your work, and a parent approves it ✓</div>';
 
     return pill + jar + '<div class="sectlabel">Required chores'+addBtn+'</div>' + list + hint;
   }
@@ -698,15 +696,14 @@
   function choreCard(c){
     var ap=approvedCount(c), pend=marksFor(c).filter(function(x){return x===1;}).length, ok=secured(c);
     var ti = c.layout==="week" ? todayIdx(state.weekStart) : -1;
-    var lock = frozen() && role!=="parent";
     var slots = marksFor(c).map(function(v,i){
       var cls = v===2?"approved":v===1?"pending":"";
       var mark = v===2?"✓":v===1?"•":"";
       if(c.layout==="week"){
-        return '<button class="slot '+cls+(i===ti?" today":"")+(lock?" lock":"")+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+
+        return '<button class="slot '+cls+(i===ti?" today":"")+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+
           '<span class="mk">'+mark+'</span>'+DAYS[i]+'</button>';
       }
-      return '<button class="slot star '+cls+(lock?" lock":"")+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+(v===2?"★":"☆")+'</button>';
+      return '<button class="slot star '+cls+'" data-act="slot" data-c="'+c.id+'" data-i="'+i+'">'+(v===2?"★":"☆")+'</button>';
     }).join("");
 
     var goal = c.layout==="week" ? ("Any "+c.need+" of "+c.slots+" days") : (c.need+"× this week");
@@ -798,7 +795,7 @@
     var ex=weekExtras(), base=baseEarned(), tot=round2(base+ex);
     var t=totalNeed(), got=state.required.reduce(function(a,c){ return a+Math.min(approvedCount(c),c.need); },0);
     var big =
-      '<section class="card bigtotal"><div class="lab">'+(frozen()?"Ready to pay "+esc(state.child):"So far this week, "+esc(state.child)+" has earned")+'</div>'+
+      '<section class="card bigtotal"><div class="lab">'+(weekOver()?"Ready to pay "+esc(state.child):"So far this week, "+esc(state.child)+" has earned")+'</div>'+
       '<div class="amt num">'+money(tot)+'</div>'+
       '<div class="brk"><span>Chores '+money(base)+'</span><span>+ Jobs '+money(ex)+'</span></div></section>';
     var brk = '<section class="card" style="padding:6px 16px">'+
@@ -935,10 +932,6 @@
       return;
     }
 
-    if(frozen()){
-      confirmAction({title:"This week is locked 🔒", msg:"The week ended and is waiting on a parent to pay it out. Once they do, a fresh week starts and you can keep earning.", ok:"Got it", onOk:function(){}});
-      return;
-    }
     if(m[i]===2) return;                       // already approved — nothing to do
     if(m[i]===1){                              // undo a pending mark
       confirmAction({title:"Undo this one?", msg:"Takes back your <b>"+esc(c.name)+"</b> mark. You can always do it again.",
@@ -1074,10 +1067,13 @@
     });
   }
   function confirmNewWeek(){
+    var lost=round2(baseEarned()+weekExtras());
     confirmAction({
-      title:"Start a new week without paying?",
-      msg:"Clears every star and this week's job money <b>without logging a payday</b>. Use this to fix a mistake, not on payday.",
-      ok:"Start fresh week", tone:"coral",
+      title:"Reset the week?",
+      msg:"Clears every star and this week's job money <b>without logging a payday</b>."+
+          (lost>0?" <b>"+money(lost)+"</b> earned so far will not be paid or recorded.":"")+
+          " Use this to fix a mistake — on payday use Pay instead.",
+      ok:"Reset the week", tone:"coral",
       onOk:function(){ state.weekStart=nextWeekStart(); state.marks={}; state.earnings=[]; PhotoStore.clear(); save(); render(); }
     });
   }
@@ -1178,7 +1174,7 @@
         '<button class="btn wide mint" data-act="approveall" style="margin-top:10px">Approve all '+items.length+' ✓</button>'
       : '<div class="dashsec">Approvals</div><div class="dashbox pad" style="text-align:center;color:var(--ink-soft);font-weight:700;font-size:13.5px">All caught up ✓</div>';
 
-    var summary = '<div class="dashsec">This week'+(frozen()?" · 🔒 finished":"")+'</div>'+
+    var summary = '<div class="dashsec">This week'+(weekOver()?" · ready for payday":"")+'</div>'+
       '<div class="dashnum"><div><div class="k num">'+money(base)+'</div><div class="l">CHORES</div></div>'+
       '<div><div class="k num">'+money(ex)+'</div><div class="l">SIDE HUSTLE</div></div>'+
       '<div><div class="k num">'+money(tot)+'</div><div class="l">PAYDAY</div></div></div>';
@@ -1191,7 +1187,7 @@
     var actions = '<div class="dashsec">Week controls</div>'+
       '<div class="sheetbtns stack">'+
       '<button class="btn wide gold" data-act="pay" '+(tot<=0?"disabled":"")+'>💸 Pay '+money(tot)+' & start next week</button>'+
-      '<button class="btn wide ghost" data-act="newweek">↻ Start a new week without paying</button>'+
+      '<button class="btn wide ghost" data-act="newweek">↻ Reset the week (no payout)</button>'+
       '<button class="btn wide ghost" data-act="settings">⚙️ Name, PIN &amp; sound</button>'+
       '<button class="btn wide coral" data-act="resetall">⚠️ Reset everything</button>'+
       '<button class="btn wide ghost" data-act="exitparent">Exit parent mode</button>'+

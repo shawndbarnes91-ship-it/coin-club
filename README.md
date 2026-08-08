@@ -37,10 +37,17 @@ photo proof, this week's totals, the weekly allowance, and the week controls.
 merged into the photo step so it's one deliberate action rather than two. The one exception is
 drag-to-reorder, which is a continuous gesture and isn't worth a popup (order isn't money).
 
-The week **never resets on its own.** When the Saturday–Friday week ends it freezes and waits —
-stars lock, nothing is wiped — until a parent taps *Pay* (logs the payday, starts a fresh week)
-or *Start a new week without paying*. This replaced an automatic rollover that silently deleted
-unpaid extra-job earnings.
+The week **never resets or locks on its own.** A week ends only when a parent taps *Pay* (logs
+the payday and starts a fresh week) or *Reset the week (no payout)*. Nothing is ever locked or
+wiped automatically.
+
+If the Saturday–Friday window passes before a parent gets to it, the week simply keeps running —
+Katia can still finish anything she missed and it still counts. The Week tab shows a friendly
+"Week finished! — waiting on a parent to pay it out" nudge and the dashboard flags *ready for
+payday*, but neither blocks anything.
+
+This replaced an automatic rollover that wiped chore marks on the first load of a new calendar
+week and silently deleted unpaid extra-job earnings along with them.
 
 ## Photo proof
 
