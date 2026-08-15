@@ -279,7 +279,7 @@
   /* ---------- local cache ---------- */
   var KEY  = "katia-coin-club-v3";
   var PKEY = "katia-coin-club-photos";   /* photos stay LOCAL — never synced (4KB ceiling) */
-  var APP_VERSION = "v8";
+  var APP_VERSION = "v9";
   var deviceId = (function(){ try{ var d=localStorage.getItem("coinclub-device"); if(!d){ d="d"+Math.random().toString(36).slice(2,9); localStorage.setItem("coinclub-device",d);} return d; }catch(e){ return "d"+Math.random().toString(36).slice(2,9); } })();
   var Store = {
     load:function(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } },
@@ -315,6 +315,13 @@
     init:function(onRemote){
       if(!window.SYNC_TOPIC){ return; }
       this.topic = window.SYNC_TOPIC; this.cb = onRemote; var self=this;
+      this.catchUp(function(){ cloudOn=true; render(); self.listen(); });
+    },
+    /* Pulls whatever's newest from ntfy's short cache. Runs at boot, and again on
+       resync — a backgrounded phone's SSE connection dies silently, so this is
+       what actually catches up a device that missed messages while asleep. */
+    catchUp:function(after){
+      var self=this;
       fetch("https://ntfy.sh/"+this.topic+"/json?poll=1&since=12h", {cache:"no-store"})
         .then(function(r){ return r.ok ? r.text() : ""; })
         .then(function(txt){
@@ -322,10 +329,10 @@
           (txt||"").split("\n").forEach(function(line){ line=line.trim(); if(!line) return;
             try{ var m=JSON.parse(line); if(m.event==="message" && m.message && m.message.charAt(0)==="{"){ var st=JSON.parse(m.message); var r=st.rev||0; if(r>=bestRev){ bestRev=r; best=st; } } }catch(e){} });
           if(best){ self.cb(best); }
-          else { self.publish(state); }
-          cloudOn=true; render(); self.listen();
+          else if(!cloudOn){ self.publish(state); }
+          if(after) after();
         })
-        .catch(function(){ cloudOn=true; render(); self.listen(); });
+        .catch(function(){ if(after) after(); });
     },
     listen:function(){
       var self=this;
@@ -338,6 +345,18 @@
         };
         this.es.onopen = function(){ if(!cloudOn){ cloudOn=true; render(); } };
       }catch(e){}
+    },
+    /* The app coming back to the foreground (screen unlocked, tab switched back to,
+       network reconnecting) doesn't guarantee the old SSE connection survived —
+       mobile OSes routinely kill it in the background and it never reconnects on
+       its own. Re-check it and re-run the catch-up poll so nothing gets missed. */
+    resync:function(){
+      if(!this.topic) return;
+      if(!this.es || this.es.readyState === 2 /* CLOSED */){
+        try{ if(this.es) this.es.close(); }catch(e){}
+        this.listen();
+      }
+      this.catchUp();
     },
     publish:function(s){ try{ fetch("https://ntfy.sh/"+this.topic, {method:"POST", body:JSON.stringify(s)}).catch(function(){}); }catch(e){} },
     push:function(s){ if(!this.topic) return; var self=this; clearTimeout(this.t); this.t=setTimeout(function(){ self.publish(s); }, 400); }
@@ -1446,6 +1465,9 @@
   /* ---------- boot ---------- */
   render();
   Sync.init(onRemote);
+  document.addEventListener("visibilitychange", function(){ if(document.visibilityState==="visible") Sync.resync(); });
+  window.addEventListener("pageshow", function(){ Sync.resync(); });
+  window.addEventListener("online", function(){ Sync.resync(); });
 })();
 </script>
 <script>
