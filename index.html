@@ -279,7 +279,7 @@
   /* ---------- local cache ---------- */
   var KEY  = "katia-coin-club-v3";
   var PKEY = "katia-coin-club-photos";   /* photos stay LOCAL — never synced (4KB ceiling) */
-  var APP_VERSION = "v9";
+  var APP_VERSION = "v10";
   var deviceId = (function(){ try{ var d=localStorage.getItem("coinclub-device"); if(!d){ d="d"+Math.random().toString(36).slice(2,9); localStorage.setItem("coinclub-device",d);} return d; }catch(e){ return "d"+Math.random().toString(36).slice(2,9); } })();
   var Store = {
     load:function(){ try{ return JSON.parse(localStorage.getItem(KEY)); }catch(e){ return null; } },
@@ -609,23 +609,95 @@
     var we=weekExtras(); if(we>state.maxWeekExtras) state.maxWeekExtras=round2(we);
   }
 
-  /* ---------- incoming remote updates ---------- */
+  /* ---------- incoming remote updates ----------
+     Two devices can edit from the same known revision at once — Katia checks a
+     chore while a parent approves something else — and used to be resolved by
+     fully discarding one side's edit and keeping the other's whole state. That's
+     what looked like things randomly reverting or "swapping" between phones.
+     Instead, merge the fields that actually collide in normal use (marks,
+     earnings, jobs, badges) so neither side's work ever gets thrown away, and
+     only republish when the merge adds something neither side already had —
+     otherwise two devices just re-broadcast at each other forever. */
   var synced = false;
+  function mergeMarks(a,b){
+    a=a||{}; b=b||{};
+    var ids={}, id; for(id in a) ids[id]=1; for(id in b) ids[id]=1;
+    var out={};
+    Object.keys(ids).forEach(function(cid){
+      var av=a[cid]||[], bv=b[cid]||[], len=Math.max(av.length,bv.length), m=new Array(len);
+      for(var i=0;i<len;i++){ m[i]=Math.max(av[i]||0, bv[i]||0); } // 0 none < 1 pending < 2 approved — never lose progress
+      out[cid]=m;
+    });
+    return out;
+  }
+  function mergeEarnings(a,b){
+    var map={}, order=[];
+    (a||[]).concat(b||[]).forEach(function(e){ if(e && !map[e.id]){ map[e.id]=e; order.push(e.id); } });
+    return order.map(function(id){ return map[id]; });
+  }
+  function mergeJobs(a,b){
+    var rank={proposed:0,open:1,claimed:2,pending:3};
+    var map={}, order=[];
+    (a||[]).forEach(function(j){ map[j.id]=j; order.push(j.id); });
+    (b||[]).forEach(function(j){
+      var cur=map[j.id];
+      if(!cur){ map[j.id]=j; order.push(j.id); }
+      else if((rank[j.status]||0) > (rank[cur.status]||0)) map[j.id]=j; // further-along status wins
+    });
+    return order.map(function(id){ return map[id]; });
+  }
+  function mergeAch(a,b){
+    var out={}, k;
+    for(k in (a||{})) out[k]=a[k];
+    for(k in (b||{})) if(!out[k]) out[k]=b[k];
+    return out;
+  }
+  function mergeState(a,b){
+    var winner = (b.rev||0) >= (a.rev||0) ? b : a; // settings/structure fields: newer side wins outright
+    var out = JSON.parse(JSON.stringify(winner));
+    out.marks    = mergeMarks(a.marks, b.marks);
+    out.earnings = mergeEarnings(a.earnings, b.earnings);
+    out.jobs     = mergeJobs(a.jobs, b.jobs);
+    out.ach      = mergeAch(a.ach, b.ach);
+    return out;
+  }
+  function stripSync(s){ var c=JSON.parse(JSON.stringify(s)); delete c.rev; delete c.by; return c; }
+  function statesEqual(x,y){ return JSON.stringify(stripSync(x))===JSON.stringify(stripSync(y)); }
+
   function onRemote(remote){
     if(!remote){ Sync.push(state); synced = true; return; }
     remote = normalize(remote);
     var rr = remote.rev||0, myBy = state.by||"", rBy = remote.by||"";
-    if(rr < lastRev){ Sync.push(state); return; }               // we're newer → rebroadcast ours, ignore theirs
     if(rr === lastRev && rBy === myBy){ synced = true; return; } // our own echo
-    if(rr === lastRev && rBy < myBy){ Sync.push(state); return; }// same version, we win the tiebreak
-    var showPop = synced && role === "katia";
-    var d = showPop ? diffApprovals(state, remote) : null;
-    state = remote; lastRev = rr; Store.save(state); synced = true; render();
-    if(d){
-      if(d.earning)      moneyPopup("+"+money(d.earning.amount), d.earning.label+" — approved! 🎉");
-      else if(d.secured) moneyPopup(money(state.base)+" — full jar!", "You finished every chore this week! 🎉");
-      else if(d.chore)   moneyPopup("Approved! ✓", d.chore);
+
+    var merged = mergeState(state, remote);
+
+    if(statesEqual(merged, remote)){
+      // remote already has everything we have — just adopt it, nothing to republish
+      var showPop = synced && role === "katia";
+      var d = showPop ? diffApprovals(state, remote) : null;
+      state = remote; lastRev = Math.max(lastRev, rr); Store.save(state); synced = true; render();
+      popApproval(d);
+      return;
     }
+    if(statesEqual(merged, state)){
+      // nothing new for us in this message
+      if(rr < lastRev) Sync.push(state); // help a straggler catch up
+      lastRev = Math.max(lastRev, rr); synced = true; return;
+    }
+
+    // genuine divergence — both sides made an edit the other doesn't have yet
+    var showPop2 = synced && role === "katia";
+    var d2 = showPop2 ? diffApprovals(state, merged) : null;
+    state = merged; save(); // save() prunes, stamps a fresh rev/by, and republishes the merge
+    synced = true; render();
+    popApproval(d2);
+  }
+  function popApproval(d){
+    if(!d) return;
+    if(d.earning)      moneyPopup("+"+money(d.earning.amount), d.earning.label+" — approved! 🎉");
+    else if(d.secured) moneyPopup(money(state.base)+" — full jar!", "You finished every chore this week! 🎉");
+    else if(d.chore)   moneyPopup("Approved! ✓", d.chore);
   }
   function diffApprovals(o, n){
     var res = {};
